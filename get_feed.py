@@ -58,11 +58,6 @@ class VideoStreamWidget(object):
 if __name__ == '__main__':
 
     # Open and read in rtsp URL for the cameras 
-
-    # with open('ip_cam_links.txt', 'r') as file:
-    #     stream_link = file.readlines()
-    # ip_cams = [x.strip() for x in stream_link]
-
     with open(config_file) as f:
         config_dict = json.load(f)
     ip_cams = config_dict['ip_cams']
