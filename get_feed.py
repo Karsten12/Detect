@@ -1,5 +1,5 @@
 from threading import Thread
-import cv2, datetime, time
+import cv2, datetime, time, json
 
 class VideoStreamWidget(object):
     def __init__(self, src=0):
@@ -58,7 +58,7 @@ class VideoStreamWidget(object):
 if __name__ == '__main__':
 
     # Open and read in rtsp URL for the cameras 
-    with open(config_file) as f:
+    with open('config.json') as f:
         config_dict = json.load(f)
     ip_cams = config_dict['ip_cams']
 

@@ -90,8 +90,7 @@ def write_image(frame, class_id, dimensions):
 if __name__ == '__main__':
     
     # Load details
-    config_file = 'config.json'
-    with open(config_file) as f:
+    with open('config.json') as f:
         config_dict = json.load(f)
 
     # Load name of classes
