@@ -8,7 +8,7 @@ class VideoStreamWidget(object):
 
         # self.fps = int(self.capture.get(cv2.CAP))
 
-        self.capture.set(cv2.CAP_PROP_FPS, int(1))
+        # self.capture.set(cv2.CAP_PROP_FPS, int(1))
 
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.update, args=())
