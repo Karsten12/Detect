@@ -6,10 +6,6 @@ class VideoStreamWidget(object):
         # Create a VideoCapture object
         self.capture = cv2.VideoCapture(src)
 
-        # self.fps = int(self.capture.get(cv2.CAP))
-
-        # self.capture.set(cv2.CAP_PROP_FPS, int(1))
-
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.update, args=())
         self.thread.daemon = True
@@ -27,10 +23,6 @@ class VideoStreamWidget(object):
         if self.status:
             self.frame = self.maintain_aspect_ratio_resize(self.frame, width=800)
             cv2.imshow('IP Camera Video Streaming', self.frame)
-
-        # currentDT = datetime.datetime.now()
-        # formated_time = currentDT.strftime("%Y-%m-%d %H:%M:%S")
-        # print(formated_time)
 
         # Press Q on keyboard to stop recording
         key = cv2.waitKey(1)
@@ -66,12 +58,17 @@ class VideoStreamWidget(object):
 if __name__ == '__main__':
 
     # Open and read in rtsp URL for the cameras 
-    with open('ip_cam_links.txt', 'r') as file:
-        stream_link = file.readlines()
-    stream_link = [x.strip() for x in stream_link]
 
-    door_cam = stream_link[0]
-    driveway_cam = stream_link[1]
+    # with open('ip_cam_links.txt', 'r') as file:
+    #     stream_link = file.readlines()
+    # ip_cams = [x.strip() for x in stream_link]
+
+    with open(config_file) as f:
+        config_dict = json.load(f)
+    ip_cams = config_dict['ip_cams']
+
+    door_cam = ip_cams[0]
+    driveway_cam = ip_cams[1]
 
     video_stream_widget = VideoStreamWidget(driveway_cam)
     while True:

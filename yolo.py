@@ -1,8 +1,8 @@
 import cv2 as cv
-import argparse
 import sys
 import numpy as np
 import os.path
+import json
 from datetime import datetime
 
 # Initialize the parameters
@@ -65,6 +65,7 @@ def postprocess(frame, outs):
     indices = cv.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
     for i in indices:
         i = i[0]
+        # Skip classes that aren't people
         if classIds[i] != 0:
             continue
         box = boxes[i]
@@ -87,16 +88,16 @@ def write_image(frame, class_id, dimensions):
 
 
 if __name__ == '__main__':
+    
+    # Load details
+    config_file = 'config.json'
+    with open(config_file) as f:
+        config_dict = json.load(f)
 
-    parser = argparse.ArgumentParser(description='Object Detection using YOLO in OPENCV')
-    parser.add_argument('--video', help='Path to video file.')
-    args = parser.parse_args()
-            
-    # Load names of classes
-    classesFile = "coco.names"
-    classes = None
-    with open(classesFile, 'rt') as f:
-        classes = f.read().rstrip('\n').split('\n')
+    # Load name of classes
+    classes = config_dict['coco_classes']
+    # Load links to ip cams
+    ip_cams = config_dict['ip_cams']
 
     # Give the configuration and weight files for the model and load the network using them.
     modelConfiguration = "yolov3.cfg"
@@ -108,17 +109,19 @@ if __name__ == '__main__':
 
     # Process inputs
     cv.namedWindow("Stream", cv.WINDOW_NORMAL)
-    cap = cv.VideoCapture(str(args.video))
+    cap = cv.VideoCapture(str(ip_cams[0]))
     if not cap.isOpened():
         raise IOError("Couldn't open webcam or video")
 
     while cv.waitKey(1) < 0:
 
-        # get frame from the video
+        # Grab frame from video
         for _ in range(0, 24):
             cap.grab()
         hasFrame, frame = cap.read()
-        # (y, y_height) (x, x_width)
+
+        # Crop the frame
+        # (y_min, y_max) (x_min, x_max)
         # frame = frame[300:1080, 200:1920]
         
         # Stop the program if reached end of video
