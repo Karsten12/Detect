@@ -1,6 +1,7 @@
 from threading import Thread
 import cv2, datetime, time, json
 
+
 class VideoStreamWidget(object):
     def __init__(self, src=0):
         # Create a VideoCapture object
@@ -17,22 +18,23 @@ class VideoStreamWidget(object):
             if self.capture.isOpened():
                 (self.status, self.frame) = self.capture.read()
 
-
     def show_frame(self):
         # Display frames in main program
         if self.status:
             self.frame = self.maintain_aspect_ratio_resize(self.frame, width=800)
-            cv2.imshow('IP Camera Video Streaming', self.frame)
+            cv2.imshow("IP Camera Video Streaming", self.frame)
 
         # Press Q on keyboard to stop recording
         key = cv2.waitKey(1)
-        if key == ord('q'):
+        if key == ord("q"):
             self.capture.release()
             cv2.destroyAllWindows()
             exit(1)
 
     # Resizes a image and maintains aspect ratio
-    def maintain_aspect_ratio_resize(self, image, width=None, height=None, inter=cv2.INTER_AREA):
+    def maintain_aspect_ratio_resize(
+        self, image, width=None, height=None, inter=cv2.INTER_AREA
+    ):
         # Grab the image size and initialize dimensions
         dim = None
         (h, w) = image.shape[:2]
@@ -55,12 +57,13 @@ class VideoStreamWidget(object):
         # Return the resized image
         return cv2.resize(image, dim, interpolation=inter)
 
-if __name__ == '__main__':
 
-    # Open and read in rtsp URL for the cameras 
-    with open('config.json') as f:
+if __name__ == "__main__":
+
+    # Open and read in rtsp URL for the cameras
+    with open("config.json") as f:
         config_dict = json.load(f)
-    ip_cams = config_dict['ip_cams']
+    ip_cams = config_dict["ip_cams"]
 
     door_cam = ip_cams[0]
     driveway_cam = ip_cams[1]

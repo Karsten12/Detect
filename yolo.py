@@ -1,7 +1,5 @@
 import cv2 as cv
-import sys
 import numpy as np
-import os.path
 import json
 import time
 from datetime import datetime
@@ -9,8 +7,8 @@ from datetime import datetime
 # Initialize the parameters
 classes = None
 confThreshold = 0.8  # Confidence threshold
-nmsThreshold = 0.4   # Non-maximum suppression threshold
-inpWidth = inpHeight = 320       # Height/Width of network's input image
+nmsThreshold = 0.4  # Non-maximum suppression threshold
+inpWidth = inpHeight = 320  # Height/Width of network's input image
 frame = None
 
 # Get the names of the output layers
@@ -19,6 +17,7 @@ def getOutputsNames(net):
     layersNames = net.getLayerNames()
     # Get the names of the output layers, i.e. the layers with unconnected outputs
     return [layersNames[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+
 
 def drawPred(classId, conf, left, top, right, bottom):
     """ Draw the predicted bounding box
@@ -34,22 +33,29 @@ def drawPred(classId, conf, left, top, right, bottom):
 
     # Draw a bounding box.
     cv.rectangle(frame, (left, top), (right, bottom), (255, 178, 50), 3)
-    
-    label = '%.2f' % conf
-        
+
+    label = "%.2f" % conf
+
     # Get the label for the class name and its confidence
     if classes:
-        assert(classId < len(classes))
-        label = '%s:%s' % (classes[classId], label)
+        assert classId < len(classes)
+        label = "%s:%s" % (classes[classId], label)
 
-    #Display the label at the top of the bounding box
+    # Display the label at the top of the bounding box
     labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     top = max(top, labelSize[1])
-    cv.rectangle(frame, (left, top - round(1.5*labelSize[1])), (left + round(1.5*labelSize[0]), top + baseLine), (255, 255, 255), cv.FILLED)
-    cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0,0,0), 1)
+    cv.rectangle(
+        frame,
+        (left, top - round(1.5 * labelSize[1])),
+        (left + round(1.5 * labelSize[0]), top + baseLine),
+        (255, 255, 255),
+        cv.FILLED,
+    )
+    cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
+
 
 # Remove the bounding boxes with low confidence using non-maxima suppression
-def postprocess(frame, outs, show_frame=False, store_image = False):
+def postprocess(frame, outs, show_frame=False, store_image=False):
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
 
@@ -88,16 +94,18 @@ def postprocess(frame, outs, show_frame=False, store_image = False):
         height = box[3]
         if store_image:
             class_id = classes[classIds[i]]
-            dimensions = (top, top + height, left, left+width)
+            dimensions = (top, top + height, left, left + width)
             write_image(frame, class_id, dimensions)
         if show_frame:
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
+
 def write_image(frame, class_id, dimensions):
-    fileName = str(class_id) + '_' + str(datetime.now()) + '.png'
+    fileName = str(class_id) + "_" + str(datetime.now()) + ".png"
     top, bottom, left, right = dimensions
     outFile = frame[top:bottom, left:right]
     cv.imwrite(fileName, outFile)
+
 
 def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=False):
     """ Run Yolov3 algorithm for on the cap video feed, detecting classes given by coco_classes for duration time
@@ -122,7 +130,7 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
 
     if not cap.isOpened():
         raise IOError("Couldn't open video")
-    
+
     if show_frame:
         cv.namedWindow("Yolo", cv.WINDOW_NORMAL)
 
@@ -140,14 +148,16 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
         # frame = frame[300:1080, 200:1920] # Classifying people
-        frame = frame[0:500, 0:1920] # Classifying Cars 
-        
+        frame = frame[0:500, 0:1920]  # Classifying Cars
+
         # Stop the program if reached end of video
         if frame is None:
             break
 
         # Create a 4D blob from a frame.
-        blob = cv.dnn.blobFromImage(frame, 1/255, (inpWidth, inpHeight), [0,0,0], 1, crop=False)
+        blob = cv.dnn.blobFromImage(
+            frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False
+        )
 
         # Sets the input to the network
         net.setInput(blob)
@@ -167,14 +177,15 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
         if show_frame:
             cv.imshow("Yolo", frame)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     # Load details
-    with open('config.json') as f:
+    with open("config.json") as f:
         config_dict = json.load(f)
 
     # Load links to ip cams
-    ip_cams = config_dict['ip_cams']
+    ip_cams = config_dict["ip_cams"]
 
     # Process inputs
     cap = cv.VideoCapture(str(ip_cams[1]))
@@ -187,4 +198,4 @@ if __name__ == '__main__':
     net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
     net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
-    run_yolo(net, cap, config_dict['coco_classes'], None, True, False)
+    run_yolo(net, cap, config_dict["coco_classes"], None, True, False)
