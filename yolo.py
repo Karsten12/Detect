@@ -20,8 +20,18 @@ def getOutputsNames(net):
     # Get the names of the output layers, i.e. the layers with unconnected outputs
     return [layersNames[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
-# Draw the predicted bounding box
 def drawPred(classId, conf, left, top, right, bottom):
+    """ Draw the predicted bounding box
+    
+    Arguments:
+        classId {int} -- A number from 0 to 79, representing the class detected
+        conf {float} -- How confident the NN that the object is actually the class detected
+        left {[type]} -- The left of the bounding box
+        top {[type]} -- The top of the bounding box
+        right {[type]} -- The right of the bounding box
+        bottom {[type]} -- The bottom of the bounding box
+    """
+
     # Draw a bounding box.
     cv.rectangle(frame, (left, top), (right, bottom), (255, 178, 50), 3)
     
@@ -89,10 +99,11 @@ def write_image(frame, class_id, dimensions):
     outFile = frame[top:bottom, left:right]
     cv.imwrite(fileName, outFile)
 
-def run_yolo(cap, coco_classes, duration, show_frame=False, store_image=False):
+def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=False):
     """ Run Yolov3 algorithm for on the cap video feed, detecting classes given by coco_classes for duration time
     
     Arguments:
+        net {Net object} -- Darknet neural network
         cap {VideoCapture object} -- [description]
         coco_classes {List} -- [description]
         duration {time} -- [description]
@@ -107,13 +118,7 @@ def run_yolo(cap, coco_classes, duration, show_frame=False, store_image=False):
 
     global frame, classes
     # Give the configuration and weight files for the model and load the network using them.
-    modelConfiguration = "yolov3.cfg"
-    modelWeights = "yolov3.weights"
     classes = coco_classes
-
-    net = cv.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
-    net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
-    net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
     if not cap.isOpened():
         raise IOError("Couldn't open video")
@@ -135,7 +140,7 @@ def run_yolo(cap, coco_classes, duration, show_frame=False, store_image=False):
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
         # frame = frame[300:1080, 200:1920] # Classifying people
-        frame = frame[0:500, 0:1920]
+        frame = frame[0:500, 0:1920] # Classifying Cars 
         
         # Stop the program if reached end of video
         if frame is None:
@@ -174,6 +179,12 @@ if __name__ == '__main__':
     # Process inputs
     cap = cv.VideoCapture(str(ip_cams[1]))
 
-    timeout = time.time() + 10*1
+    # Load details for darknet
+    modelConfiguration = "yolov3.cfg"
+    modelWeights = "yolov3.weights"
 
-    run_yolo(cap, config_dict['coco_classes'], timeout, True, False)
+    net = cv.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
+    net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
+    net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
+
+    run_yolo(net, cap, config_dict['coco_classes'], None, True, False)
