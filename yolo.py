@@ -69,8 +69,8 @@ def postprocess(frame, outs, show_frame=False, store_image = False):
     for i in indices:
         i = i[0]
         # Skip classes that aren't people
-        # if classIds[i] != 0:
-        #     continue
+        if classIds[i] != 2:
+            continue
         box = boxes[i]
         left = box[0]
         top = box[1]
@@ -90,6 +90,21 @@ def write_image(frame, class_id, dimensions):
     cv.imwrite(fileName, outFile)
 
 def run_yolo(cap, coco_classes, duration, show_frame=False, store_image=False):
+    """ Run Yolov3 algorithm for on the cap video feed, detecting classes given by coco_classes for duration time
+    
+    Arguments:
+        cap {VideoCapture object} -- [description]
+        coco_classes {List} -- [description]
+        duration {time} -- [description]
+    
+    Keyword Arguments:
+        show_frame {bool} -- [description] (default: {False})
+        store_image {bool} -- [description] (default: {False})
+    
+    Raises:
+        IOError: Video feed is not working
+    """
+
     global frame, classes
     # Give the configuration and weight files for the model and load the network using them.
     modelConfiguration = "yolov3.cfg"
@@ -119,7 +134,8 @@ def run_yolo(cap, coco_classes, duration, show_frame=False, store_image=False):
 
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
-        # frame = frame[300:1080, 200:1920]
+        # frame = frame[300:1080, 200:1920] # Classifying people
+        frame = frame[0:500, 0:1920]
         
         # Stop the program if reached end of video
         if frame is None:
@@ -156,7 +172,7 @@ if __name__ == '__main__':
     ip_cams = config_dict['ip_cams']
 
     # Process inputs
-    cap = cv.VideoCapture(str(ip_cams[0]))
+    cap = cv.VideoCapture(str(ip_cams[1]))
 
     timeout = time.time() + 10*1
 

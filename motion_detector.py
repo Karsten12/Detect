@@ -2,6 +2,7 @@ import imutils
 import cv2
 import json
 import yolo
+import time
 
 def motion_detector(ip_cams, show_frames=False):
 
@@ -69,6 +70,8 @@ def motion_detector(ip_cams, show_frames=False):
 		if motionCounter >= min_motion_frames:
 			print('Start Detection')
 			# Do YOLO detection
+			timeout = time.time() + 15*1
+			yolo.run_yolo(cap, classes, timeout, show_frame=False, store_image=True)
 			motionCounter = 0
 
 
@@ -95,6 +98,8 @@ if __name__ == '__main__':
 	with open('config.json') as f:
 		config_dict = json.load(f)
 
+	# 
+	classes = config_dict['coco_classes']
 	# Load links to ip cams
 	ip_cams = config_dict['ip_cams']
 	if ip_cams is None:
