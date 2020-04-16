@@ -127,4 +127,6 @@ if __name__ == "__main__":
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-    motion_detector(ip_cams[1], True)
+
+    print("Starting motion detection...")
+    motion_detector(ip_cams[1], False)
