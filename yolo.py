@@ -11,8 +11,15 @@ nmsThreshold = 0.4  # Non-maximum suppression threshold
 inpWidth = inpHeight = 320  # Height/Width of network's input image
 frame = None
 
-# Get the names of the output layers
 def getOutputsNames(net):
+    """ Get the names of the output layers
+    
+    Arguments:
+        net {Net object} -- Darknet neural network
+    
+    Returns:
+        [type] -- names of the output layers
+    """
     # Get the names of all the layers in the network
     layersNames = net.getLayerNames()
     # Get the names of the output layers, i.e. the layers with unconnected outputs
@@ -54,8 +61,17 @@ def drawPred(classId, conf, left, top, right, bottom):
     cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
 
 
-# Remove the bounding boxes with low confidence using non-maxima suppression
 def postprocess(frame, outs, show_frame=False, store_image=False):
+    """ Remove the bounding boxes with low confidence using non-maxima suppression
+    
+    Arguments:
+        frame {[type]} -- The image containing the detected object
+        outs {[type]} -- The output of the yolov3 neural net for this frame
+    
+    Keyword Arguments:
+        show_frame {bool} -- Whether to show/display frames (default: {False})
+        store_image {bool} -- Whether to store images of detected objects (default: {False})
+    """
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
 
@@ -93,14 +109,21 @@ def postprocess(frame, outs, show_frame=False, store_image=False):
         width = box[2]
         height = box[3]
         if store_image:
-            class_id = classes[classIds[i]]
+            class_name = classes[classIds[i]]
             dimensions = (top, top + height, left, left + width)
-            write_image(frame, class_id, dimensions)
+            write_image(frame, class_name, dimensions)
         if show_frame:
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
 
-def write_image(frame, class_id, dimensions):
+def write_image(frame, class_name, dimensions):
+    """ Writes the frame as a png file
+    
+    Arguments:
+        frame {[type]} -- The image containing the detected object
+        class_name {str} -- The predicted class
+        dimensions {tuple} -- 4d tuple representing the top, bottom, left and right dimensions needed to crop the frame
+    """
     fileName = str(class_id) + "_" + str(datetime.now()) + ".png"
     top, bottom, left, right = dimensions
     outFile = frame[top:bottom, left:right]
@@ -117,8 +140,8 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
         duration {time} -- [description]
     
     Keyword Arguments:
-        show_frame {bool} -- [description] (default: {False})
-        store_image {bool} -- [description] (default: {False})
+        show_frame {bool} -- Whether to show/display frames (default: {False})
+        store_image {bool} -- Whether to store images of detected objects (default: {False})
     
     Raises:
         IOError: Video feed is not working
@@ -168,7 +191,7 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
         # Remove the bounding boxes with low confidence
         postprocess(frame, outs, show_frame, store_image)
 
-        # Put efficiency information. The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
+        # Get the overall time for inference(t) and the timings for each of the layers(in layersTimes)
         # t, _ = net.getPerfProfile()
         # label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
         # cv.putText(frame, label, (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
@@ -176,6 +199,12 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
 
         if show_frame:
             cv.imshow("Yolo", frame)
+    
+
+    # Sync up the camera back to the latest frame
+    # retval = 1
+    # while retval:
+    #     retval = cap.grab()
 
 
 if __name__ == "__main__":

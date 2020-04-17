@@ -86,6 +86,7 @@ def motion_detector(ip_cam, show_frames=False):
                 yolo.run_yolo(
                     net, cap, classes, timeout, show_frame=False, store_image=True
                 )
+            print("Finished Yolov3")
             motionCounter = 0
 
         # show the frame and record if the user presses a key
@@ -129,4 +130,4 @@ if __name__ == "__main__":
 
 
     print("Starting motion detection...")
-    motion_detector(ip_cams[1], False)
+    motion_detector(ip_cams[1], True)
