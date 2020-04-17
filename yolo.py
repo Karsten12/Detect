@@ -124,7 +124,7 @@ def write_image(frame, class_name, dimensions):
         class_name {str} -- The predicted class
         dimensions {tuple} -- 4d tuple representing the top, bottom, left and right dimensions needed to crop the frame
     """
-    fileName = str(class_id) + "_" + str(datetime.now()) + ".png"
+    fileName = str(class_name) + "_" + str(datetime.now()) + ".png"
     top, bottom, left, right = dimensions
     outFile = frame[top:bottom, left:right]
     cv.imwrite(fileName, outFile)
