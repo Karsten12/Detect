@@ -3,6 +3,8 @@ import cv2
 import json
 import yolo
 import time
+from datetime import datetime
+
 
 
 def motion_detector(ip_cam, show_frames=False):
@@ -32,13 +34,17 @@ def motion_detector(ip_cam, show_frames=False):
         # if frame not available, exit
         if frame is None:
             break
+        
+        # Crop the frame
+        # (y_min, y_max) (x_min, x_max)
+        cropped_frame = frame[0:500, 0:1920]
 
         # Assume no motion
         motion = False
 
         # resize the frame, convert it to grayscale, and blur it
-        frame = imutils.resize(frame, width=500)
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cropped_frame = imutils.resize(cropped_frame, width=500)
+        frame_gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
         frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
 
         # if the average frame is None, initialize it
@@ -81,17 +87,19 @@ def motion_detector(ip_cam, show_frames=False):
         if motionCounter >= min_motion_frames:
             # Do YOLO detection for 15 seconds
             print("Running Yolov3 detection")
-            timeout = time.time() + 15 * 1
-            if use_yolov3:
-                yolo.run_yolo(
-                    net, cap, classes, timeout, show_frame=False, store_image=True
-                )
+            fileName = str(datetime.now()) + ".png"
+            cv2.imwrite(fileName, frame)
+            # timeout = time.time() + 15 * 1
+            # if use_yolov3:
+            #     yolo.run_yolo(
+            #         net, cap, classes, timeout, show_frame=False, store_image=True
+            #     )
             print("Finished Yolov3")
             motionCounter = 0
 
         # show the frame and record if the user presses a key
         if show_frames:
-            cv2.imshow("Security Feed", frame)
+            cv2.imshow("Security Feed", cropped_frame)
             cv2.imshow("Thresh", thresh)
             cv2.imshow("Frame Delta", frameDelta)
 
@@ -118,8 +126,7 @@ if __name__ == "__main__":
     if ip_cams is None:
         exit()
 
-    use_yolov3 = True
-
+    use_yolov3 = False
     if use_yolov3:
         modelConfiguration = "yolov3.cfg"
         modelWeights = "yolov3.weights"
@@ -130,4 +137,4 @@ if __name__ == "__main__":
 
 
     print("Starting motion detection...")
-    motion_detector(ip_cams[1], True)
+    motion_detector(ip_cams[1], False)
