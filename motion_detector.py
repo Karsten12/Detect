@@ -36,7 +36,7 @@ def motion_detector(ip_cam, show_frames=False):
         # if frame not available, exit
         if frame is None:
             break
-        
+
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
         # cropped_frame = frame[0:500, 0:1920]

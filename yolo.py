@@ -14,6 +14,7 @@ nmsThreshold = 0.4  # Non-maximum suppression threshold
 inpWidth = inpHeight = 320  # Height/Width of network's input image
 frame = None
 
+
 def getOutputsNames(net):
     """ Get the names of the output layers
     
@@ -62,6 +63,7 @@ def drawPred(classId, conf, left, top, right, bottom):
         cv2.FILLED,
     )
     cv2.putText(frame, label, (left, top), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
+
 
 def postprocess(frame, outs, show_frame=False, save_image=False):
     """ Remove the bounding boxes with low confidence using non-maxima suppression
@@ -116,6 +118,7 @@ def postprocess(frame, outs, show_frame=False, save_image=False):
             utils.write_image(frame, class_name, dimensions)
         if show_frame:
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
+
 
 def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=False):
     """ Run Yolov3 algorithm for on the cap video feed, detecting classes given by coco_classes for duration time
@@ -180,13 +183,12 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=Fals
 
         # Get the overall time for inference(t) and the timings for each of the layers(in layersTimes)
         t, _ = net.getPerfProfile()
-        label = 'Inference time: %.2f ms' % (t * 1000.0 / cv2.getTickFrequency())
+        label = "Inference time: %.2f ms" % (t * 1000.0 / cv2.getTickFrequency())
         cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
         print(label)
 
         if show_frame:
             cv2.imshow("Yolo", frame)
-    
 
     # Sync up the camera back to the latest frame
     # retval = 1

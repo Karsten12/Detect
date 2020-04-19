@@ -1,6 +1,7 @@
 import cv2
 from datetime import datetime
 
+
 def write_image(frame, class_name=None, dimensions=None):
     """ Writes the frame as a png file
     
