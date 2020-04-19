@@ -39,7 +39,7 @@ def motion_detector(ip_cam, show_frames=False):
 
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
-        # cropped_frame = frame[0:500, 0:1920]
+        # cropped_frame = frame[0:500, 0:1920] # Detect Cars
         cropped_frame = frame
 
         # Assume no motion
@@ -138,4 +138,4 @@ if __name__ == "__main__":
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
     print("Starting motion detection...")
-    motion_detector(ip_cams[1], False)
+    motion_detector(ip_cams[1], True)

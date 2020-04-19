@@ -7,12 +7,15 @@ def write_image(frame, class_name=None, dimensions=None):
     
     Arguments:
         frame {[type]} -- The image containing the detected object
-        class_name {str} -- The predicted class
-        dimensions {tuple} -- 4d tuple representing the top, bottom, left and right dimensions needed to crop the frame
+    
+    Keyword Arguments:
+        class_name {str} -- The predicted class (default: {None})
+        dimensions {tuple} -- tuple giving (top, bottom, left and right) dimensions needed to crop the frame (default: {None})
     """
+
     fileName = datetime.now().strftime("%m-%d-%Y--%H-%M-%S") + ".png"
     if class_name:
-        fileName = str(class_name) + fileName
+        fileName = class_name + fileName
     outFile = frame
     if dimensions:
         top, bottom, left, right = dimensions
