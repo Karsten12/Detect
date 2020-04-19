@@ -1,10 +1,12 @@
 import imutils
 import cv2
 import json
-import yolo
 import time
 from datetime import datetime
 
+# import custom files
+import yolo
+import utils
 
 
 def motion_detector(ip_cam, show_frames=False):
@@ -21,7 +23,7 @@ def motion_detector(ip_cam, show_frames=False):
 
     # initialize the frame in the video stream
     avg = None
-    min_motion_frames = 5
+    min_motion_frames = 10
     motionCounter = 0
     min_area = 500
     delta_thresh = 5
@@ -37,7 +39,8 @@ def motion_detector(ip_cam, show_frames=False):
         
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
-        cropped_frame = frame[0:500, 0:1920]
+        # cropped_frame = frame[0:500, 0:1920]
+        cropped_frame = frame
 
         # Assume no motion
         motion = False
@@ -87,8 +90,7 @@ def motion_detector(ip_cam, show_frames=False):
         if motionCounter >= min_motion_frames:
             # Do YOLO detection for 15 seconds
             print("Running Yolov3 detection")
-            fileName = str(datetime.now()) + ".png"
-            cv2.imwrite(fileName, frame)
+            utils.write_image(frame)
             # timeout = time.time() + 15 * 1
             # if use_yolov3:
             #     yolo.run_yolo(
@@ -134,7 +136,6 @@ if __name__ == "__main__":
         net = cv2.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
-
 
     print("Starting motion detection...")
     motion_detector(ip_cams[1], False)

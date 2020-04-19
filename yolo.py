@@ -4,6 +4,9 @@ import json
 import time
 from datetime import datetime
 
+# import custom files
+import utils
+
 # Initialize the parameters
 classes = None
 confThreshold = 0.8  # Confidence threshold
@@ -60,8 +63,7 @@ def drawPred(classId, conf, left, top, right, bottom):
     )
     cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
 
-
-def postprocess(frame, outs, show_frame=False, store_image=False):
+def postprocess(frame, outs, show_frame=False, save_image=False):
     """ Remove the bounding boxes with low confidence using non-maxima suppression
     
     Arguments:
@@ -70,7 +72,7 @@ def postprocess(frame, outs, show_frame=False, store_image=False):
     
     Keyword Arguments:
         show_frame {bool} -- Whether to show/display frames (default: {False})
-        store_image {bool} -- Whether to store images of detected objects (default: {False})
+        save_image {bool} -- Whether to save images of detected objects (default: {False})
     """
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
@@ -108,29 +110,14 @@ def postprocess(frame, outs, show_frame=False, store_image=False):
         top = box[1]
         width = box[2]
         height = box[3]
-        if store_image:
+        if save_image:
             class_name = classes[classIds[i]]
             dimensions = (top, top + height, left, left + width)
-            write_image(frame, class_name, dimensions)
+            utils.write_image(frame, class_name, dimensions)
         if show_frame:
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
-
-def write_image(frame, class_name, dimensions):
-    """ Writes the frame as a png file
-    
-    Arguments:
-        frame {[type]} -- The image containing the detected object
-        class_name {str} -- The predicted class
-        dimensions {tuple} -- 4d tuple representing the top, bottom, left and right dimensions needed to crop the frame
-    """
-    fileName = str(class_name) + "_" + str(datetime.now()) + ".png"
-    top, bottom, left, right = dimensions
-    outFile = frame[top:bottom, left:right]
-    cv.imwrite(fileName, outFile)
-
-
-def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=False):
+def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=False):
     """ Run Yolov3 algorithm for on the cap video feed, detecting classes given by coco_classes for duration time
     
     Arguments:
@@ -141,7 +128,7 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
     
     Keyword Arguments:
         show_frame {bool} -- Whether to show/display frames (default: {False})
-        store_image {bool} -- Whether to store images of detected objects (default: {False})
+        save_image {bool} -- Whether to save images of detected objects (default: {False})
     
     Raises:
         IOError: Video feed is not working
@@ -171,7 +158,7 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
         # frame = frame[300:1080, 200:1920] # Classifying people
-        frame = frame[0:500, 0:1920]  # Classifying Cars
+        # frame = frame[0:500, 0:1920]  # Classifying Cars
 
         # Stop the program if reached end of video
         if frame is None:
@@ -189,13 +176,13 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, store_image=Fal
         outs = net.forward(getOutputsNames(net))
 
         # Remove the bounding boxes with low confidence
-        postprocess(frame, outs, show_frame, store_image)
+        postprocess(frame, outs, show_frame, save_image)
 
         # Get the overall time for inference(t) and the timings for each of the layers(in layersTimes)
-        # t, _ = net.getPerfProfile()
-        # label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-        # cv.putText(frame, label, (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
-        # print(label)
+        t, _ = net.getPerfProfile()
+        label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
+        cv.putText(frame, label, (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
+        print(label)
 
         if show_frame:
             cv.imshow("Yolo", frame)
@@ -224,7 +211,7 @@ if __name__ == "__main__":
     modelWeights = "yolov3.weights"
 
     net = cv.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
-    net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
-    net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
+    # net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
+    # net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
     run_yolo(net, cap, config_dict["coco_classes"], None, True, False)
