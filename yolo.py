@@ -1,4 +1,4 @@
-import cv2 as cv
+import cv2
 import numpy as np
 import json
 import time
@@ -42,7 +42,7 @@ def drawPred(classId, conf, left, top, right, bottom):
     """
 
     # Draw a bounding box.
-    cv.rectangle(frame, (left, top), (right, bottom), (255, 178, 50), 3)
+    cv2.rectangle(frame, (left, top), (right, bottom), (255, 178, 50), 3)
 
     label = "%.2f" % conf
 
@@ -52,16 +52,16 @@ def drawPred(classId, conf, left, top, right, bottom):
         label = "%s:%s" % (classes[classId], label)
 
     # Display the label at the top of the bounding box
-    labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     top = max(top, labelSize[1])
-    cv.rectangle(
+    cv2.rectangle(
         frame,
         (left, top - round(1.5 * labelSize[1])),
         (left + round(1.5 * labelSize[0]), top + baseLine),
         (255, 255, 255),
-        cv.FILLED,
+        cv2.FILLED,
     )
-    cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
+    cv2.putText(frame, label, (left, top), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
 
 def postprocess(frame, outs, show_frame=False, save_image=False):
     """ Remove the bounding boxes with low confidence using non-maxima suppression
@@ -99,7 +99,7 @@ def postprocess(frame, outs, show_frame=False, save_image=False):
                 boxes.append([left, top, width, height])
 
     # non maximum suppression to eliminate redundant overlapping boxes with lower confidences
-    indices = cv.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
+    indices = cv2.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
     for i in indices:
         i = i[0]
         # Skip classes that aren't people
@@ -142,9 +142,9 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=Fals
         raise IOError("Couldn't open video")
 
     if show_frame:
-        cv.namedWindow("Yolo", cv.WINDOW_NORMAL)
+        cv2.namedWindow("Yolo", cv2.WINDOW_NORMAL)
 
-    while cv.waitKey(1) < 0:
+    while cv2.waitKey(1) < 0:
 
         if duration:
             if time.time() > duration:
@@ -165,7 +165,7 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=Fals
             break
 
         # Create a 4D blob from a frame.
-        blob = cv.dnn.blobFromImage(
+        blob = cv2.dnn.blobFromImage(
             frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False
         )
 
@@ -180,12 +180,12 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=Fals
 
         # Get the overall time for inference(t) and the timings for each of the layers(in layersTimes)
         t, _ = net.getPerfProfile()
-        label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-        cv.putText(frame, label, (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
+        label = 'Inference time: %.2f ms' % (t * 1000.0 / cv2.getTickFrequency())
+        cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
         print(label)
 
         if show_frame:
-            cv.imshow("Yolo", frame)
+            cv2.imshow("Yolo", frame)
     
 
     # Sync up the camera back to the latest frame
@@ -204,14 +204,14 @@ if __name__ == "__main__":
     ip_cams = config_dict["ip_cams"]
 
     # Process inputs
-    cap = cv.VideoCapture(str(ip_cams[1]))
+    cap = cv2.VideoCapture(str(ip_cams[1]))
 
     # Load details for darknet
     modelConfiguration = "yolov3.cfg"
     modelWeights = "yolov3.weights"
 
-    net = cv.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
-    # net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
-    # net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
+    net = cv2.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
     run_yolo(net, cap, config_dict["coco_classes"], None, True, False)
