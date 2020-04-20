@@ -120,7 +120,7 @@ def postprocess(frame, outs, show_frame=False, save_image=False):
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
 
-def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=False):
+def run_yolo(net, cap, coco_classes, duration=None, show_frame=False, save_image=False):
     """ Run Yolov3 algorithm for on the cap video feed, detecting classes given by coco_classes for duration time
     
     Arguments:
@@ -205,6 +205,11 @@ if __name__ == "__main__":
     # Load links to ip cams
     ip_cams = config_dict["ip_cams"]
 
+    if ip_cams is None:
+        exit()
+
+    show_frames = config_dict["show_frames"]
+
     # Process inputs
     cap = cv2.VideoCapture(str(ip_cams[1]))
 
@@ -216,4 +221,4 @@ if __name__ == "__main__":
     net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
     net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-    run_yolo(net, cap, config_dict["coco_classes"], None, True, False)
+    run_yolo(net, cap, config_dict["coco_classes"], None, show_frames, False)

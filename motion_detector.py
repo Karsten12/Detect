@@ -134,14 +134,20 @@ if __name__ == "__main__":
     with open("config.json") as f:
         config_dict = json.load(f)
 
+    print(config_dict)
+    exit()
+
     # Load the classes
     classes = config_dict["coco_classes"]
     # Load links to ip cams
     ip_cams = config_dict["ip_cams"]
+
     if ip_cams is None:
         exit()
 
-    use_yolov3 = False
+    show_frames = config_dict["show_frames"]
+    use_yolov3 = config_dict["yolov3"]
+
     if use_yolov3:
         modelConfiguration = "yolov3.cfg"
         modelWeights = "yolov3.weights"
@@ -151,4 +157,4 @@ if __name__ == "__main__":
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
     print("Starting motion detection...")
-    motion_detector(ip_cams[1], True)
+    motion_detector(ip_cams[1], show_frames)
