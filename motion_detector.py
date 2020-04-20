@@ -134,9 +134,6 @@ if __name__ == "__main__":
     with open("config.json") as f:
         config_dict = json.load(f)
 
-    print(config_dict)
-    exit()
-
     # Load the classes
     classes = config_dict["coco_classes"]
     # Load links to ip cams
