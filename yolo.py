@@ -9,9 +9,9 @@ import utils
 
 # Initialize the parameters
 classes = None
-confThreshold = 0.8  # Confidence threshold
+confThreshold = 0.7  # Confidence threshold
 nmsThreshold = 0.4  # Non-maximum suppression threshold
-inpWidth = inpHeight = 320  # Height/Width of network's input image
+inpWidth = inpHeight = 416  # Height/Width of network's input image
 frame = None
 
 
@@ -160,7 +160,7 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=Fals
 
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
-        # frame = frame[300:1080, 200:1920] # Classifying people
+        frame = frame[300:1080, 200:1920] # Classifying people
         # frame = frame[0:500, 0:1920]  # Classifying Cars
 
         # Stop the program if reached end of video
@@ -182,10 +182,10 @@ def run_yolo(net, cap, coco_classes, duration, show_frame=False, save_image=Fals
         postprocess(frame, outs, show_frame, save_image)
 
         # Get the overall time for inference(t) and the timings for each of the layers(in layersTimes)
-        t, _ = net.getPerfProfile()
-        label = "Inference time: %.2f ms" % (t * 1000.0 / cv2.getTickFrequency())
-        cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
-        print(label)
+        # t, _ = net.getPerfProfile()
+        # label = "Inference time: %.2f ms" % (t * 1000.0 / cv2.getTickFrequency())
+        # cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
+        # print(label)
 
         if show_frame:
             cv2.imshow("Yolo", frame)

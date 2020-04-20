@@ -15,7 +15,7 @@ def write_image(frame, class_name=None, dimensions=None):
 
     fileName = datetime.now().strftime("%m-%d-%Y--%H-%M-%S") + ".png"
     if class_name:
-        fileName = class_name + fileName
+        fileName = class_name + '_' + fileName
     outFile = frame
     if dimensions:
         top, bottom, left, right = dimensions

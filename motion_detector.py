@@ -3,6 +3,7 @@ import cv2
 import json
 import time
 from datetime import datetime
+import numpy as np
 
 # import custom files
 import yolo
@@ -19,14 +20,16 @@ def motion_detector(ip_cam, show_frames=False):
 		show_frames {bool} -- Whether or not to display the feed and the output (default: {False})
 	"""
 
-    cap = cv2.VideoCapture(str(ip_cam))
+    cap = cv2.VideoCapture(ip_cam)
 
     # initialize the frame in the video stream
     avg = None
-    min_motion_frames = 10
+    min_motion_frames = 20
     motionCounter = 0
     min_area = 500
     delta_thresh = 5
+    write_timeout = 0
+    kernel = np.ones((9, 9), np.uint8)
 
     # loop over the frames of the video
     while True:
@@ -39,8 +42,9 @@ def motion_detector(ip_cam, show_frames=False):
 
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
+        cropped_frame = frame[300:1080, 200:1920] # Detect people
         # cropped_frame = frame[0:500, 0:1920] # Detect Cars
-        cropped_frame = frame
+        # cropped_frame = frame
 
         # Assume no motion
         motion = False
@@ -60,10 +64,12 @@ def motion_detector(ip_cam, show_frames=False):
         cv2.accumulateWeighted(frame_gray, avg, 0.5)
         frameDelta = cv2.absdiff(frame_gray, cv2.convertScaleAbs(avg))
 
+        # Set pixels w/ values >= delta_thresh to white (255) else set to black (0)
         thresh = cv2.threshold(frameDelta, delta_thresh, 255, cv2.THRESH_BINARY)[1]
 
         # dilate the thresholded image to fill in holes, then find contours on thresholded image
-        thresh = cv2.dilate(thresh, None, iterations=2)
+        # thresh = cv2.dilate(thresh, kernel, iterations=2)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
         cnts = cv2.findContours(
             thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
@@ -89,21 +95,28 @@ def motion_detector(ip_cam, show_frames=False):
 
         if motionCounter >= min_motion_frames:
             # Do YOLO detection for 15 seconds
-            print("Running Yolov3 detection")
-            utils.write_image(frame)
+            # print("Running Yolov3 detection")
+            curr = time.time()
+            if curr > write_timeout:
+                print("Running Yolov3 detection")
+                # Ensure only 1 image gets written every 15 seconds
+                utils.write_image(frame)
+                utils.write_image(thresh, class_name = 'thresh')
+                write_timeout = curr + 20 * 1
+                print("Finished Yolov3")
             # timeout = time.time() + 15 * 1
             # if use_yolov3:
             #     yolo.run_yolo(
             #         net, cap, classes, timeout, show_frame=False, store_image=True
             #     )
-            print("Finished Yolov3")
+            # print("Finished Yolov3")
             motionCounter = 0
 
         # show the frame and record if the user presses a key
         if show_frames:
             cv2.imshow("Security Feed", cropped_frame)
             cv2.imshow("Thresh", thresh)
-            cv2.imshow("Frame Delta", frameDelta)
+            # cv2.imshow("Frame Delta", frameDelta)
 
         # if the `q` key is pressed, break from the loop
         key = cv2.waitKey(1) & 0xFF
