@@ -89,11 +89,6 @@ def motion_detector(ip_cam, show_frames=False):
 
             motion = True
 
-            if show_frames:
-                # compute the bounding box for the contour, draw it on the frame,
-                (x, y, w, h) = cv2.boundingRect(c)
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
         if motion:
             motionCounter += 1
         else:
