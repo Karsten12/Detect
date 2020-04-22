@@ -139,10 +139,6 @@ def motion_detector(ip_cam, show_frames=False):
 
 if __name__ == "__main__":
 
-    # Redirect the console and error to files for later viewing
-    sys.stdout = open('output/logs/out.txt', 'w')
-    sys.stderr = open('output/logs/error.txt', 'w')
-
     # Load details
     with open("config.json") as f:
         config_dict = json.load(f)
@@ -151,10 +147,17 @@ if __name__ == "__main__":
     classes = config_dict["coco_classes"]
     # Load links to ip cams
     ip_cams = config_dict["ip_cams"]
+    # Decide whether to output logs to console or file
+    logs_to_file = config_dict["logs_to_file"]
 
     if ip_cams is None:
         utils.print_err('ip cams is none')
         exit()
+
+    if logs_to_file:
+        # Redirect the console and error to files for later viewing
+        sys.stdout = open('output/logs/out.txt', 'w')
+        sys.stderr = open('output/logs/error.txt', 'w')
 
     show_frames = config_dict["show_frames"]
     use_yolov3 = config_dict["yolov3"]
