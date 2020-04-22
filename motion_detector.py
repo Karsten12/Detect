@@ -4,6 +4,7 @@ import json
 import time
 from datetime import datetime
 import numpy as np
+import sys
 
 # import custom files
 import yolo
@@ -31,6 +32,10 @@ def motion_detector(ip_cam, show_frames=False):
     write_timeout = 0
     kernel = np.ones((9, 9), np.uint8)
 
+    # Read in mask 
+    mask_image = cv2.imread('mask_v1.png', cv2.IMREAD_GRAYSCALE)
+    im_mask = imutils.resize(mask_image, width=500)
+
     # loop over the frames of the video
     while True:
         # grab current frame
@@ -42,16 +47,20 @@ def motion_detector(ip_cam, show_frames=False):
 
         # Crop the frame
         # (y_min, y_max) (x_min, x_max)
-        cropped_frame = frame[300:1080, 200:1920] # Detect people
+        # cropped_frame = frame[300:1080, 200:1920] # Detect people
         # cropped_frame = frame[0:500, 0:1920] # Detect Cars
-        # cropped_frame = frame
+        cropped_frame = frame
 
         # Assume no motion
         motion = False
 
-        # resize the frame, convert it to grayscale, and blur it
+        # Resize and convert frame to grayscale
         cropped_frame = imutils.resize(cropped_frame, width=500)
         frame_gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
+ 
+        # Mask out the areas that are not important 
+        frame_gray = cv2.bitwise_and(frame_gray, frame_gray, mask = im_mask)
+        # Blur 
         frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
 
         # if the average frame is None, initialize it
@@ -130,6 +139,10 @@ def motion_detector(ip_cam, show_frames=False):
 
 if __name__ == "__main__":
 
+    # Redirect the console and error to files for later viewing
+    # sys.stdout = open('out.txt', 'w')
+    # sys.stderr = open('error.txt', 'w')
+
     # Load details
     with open("config.json") as f:
         config_dict = json.load(f)
@@ -155,3 +168,7 @@ if __name__ == "__main__":
 
     print("Starting motion detection...")
     motion_detector(ip_cams[1], show_frames)
+
+    # #!/usr/bin/env python3 to top of file
+    # chmod +x motion_detector.py
+    # Run using -> nohup timeout 10 motion_detector &
