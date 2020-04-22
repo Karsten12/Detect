@@ -10,27 +10,6 @@ import sys
 import yolo
 import utils
 
-
-
-crop_dimensions=(175, 1080, 250, 1920)
-def crop_and_resize_frame(frame):
-    # Default crop detects people
-    y_min, y_max, x_min, x_max = crop_dimensions
-    return imutils.resize(frame[y_min:y_max, x_min:x_max], width=500)
-
-def crop_and_or_resize_frame(frame, crop=False, resize=False):
-    # Default crop detects people
-    if not crop and not resize:
-        exit()
-    if crop:
-        y_min, y_max, x_min, x_max = crop_dimensions
-        temp = frame[y_min:y_max, x_min:x_max]
-    if resize:
-        if crop:
-            return imutils.resize(temp, width=500)
-        else:
-            return imutils.resize(frame, width=500)
-
 def motion_detector(ip_cam, show_frames=False):
     """ Detects motion from the video feed of ip_cam, and if motion calls YoloV3 to do object recognition 
 	
@@ -57,7 +36,7 @@ def motion_detector(ip_cam, show_frames=False):
 
     # Read in mask 
     mask_image = cv2.imread('images/mask.png', cv2.IMREAD_GRAYSCALE)
-    im_mask = crop_and_resize_frame(mask_image)
+    im_mask = utils.crop_and_resize_frame(mask_image)
 
     # loop over the frames of the video
     while True:
@@ -71,24 +50,24 @@ def motion_detector(ip_cam, show_frames=False):
         # Assume no motion
         motion = False
 
-        # Resize and convert frame to grayscale
-        cropped_frame = crop_and_resize_frame(frame)
+        # Crop and resize and convert frame to grayscale
+        cropped_frame = utils.crop_and_resize_frame(frame)
         frame_gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
  
         # Mask out the areas that are not important 
-        frame_gray = cv2.bitwise_and(frame_gray, frame_gray, mask = im_mask)
+        masked_frame = cv2.bitwise_and(frame_gray, frame_gray, mask = im_mask)
         # Blur 
-        frame_gray = cv2.GaussianBlur(frame_gray, blur_kernel, 0)
+        blurred_frame = cv2.GaussianBlur(masked_frame, blur_kernel, 0)
 
         # if the average frame is None, initialize it
         if avg is None:
-            avg = frame_gray.copy().astype("float")
+            avg = blurred_frame.copy().astype("float")
             continue
 
         # Do weighted average between current & previous frame
         # Then compute difference between curr and average frame
-        cv2.accumulateWeighted(frame_gray, avg, 0.5)
-        frameDelta = cv2.absdiff(frame_gray, cv2.convertScaleAbs(avg))
+        cv2.accumulateWeighted(blurred_frame, avg, 0.5)
+        frameDelta = cv2.absdiff(blurred_frame, cv2.convertScaleAbs(avg))
 
         # Set pixels w/ values >= delta_thresh to white (255) else set to black (0)
         thresh = cv2.threshold(frameDelta, delta_thresh, 255, cv2.THRESH_BINARY)[1]
@@ -104,14 +83,14 @@ def motion_detector(ip_cam, show_frames=False):
 
         # loop over the contours
         for c in cnts:
-            # if the contour is too small, ignore it
             if cv2.contourArea(c) < min_area:
+                # if the contour is too small, ignore it
                 continue
 
             motion = True
 
-            # compute the bounding box for the contour, draw it on the frame,
             if show_frames:
+                # compute the bounding box for the contour, draw it on the frame,
                 (x, y, w, h) = cv2.boundingRect(c)
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
@@ -125,12 +104,11 @@ def motion_detector(ip_cam, show_frames=False):
             # print("Running Yolov3 detection")
             curr = time.time()
             if curr > write_timeout:
-                print("Running Yolov3 detection")
                 # Ensure only 1 image gets written every 15 seconds
+                print("Writing image")
                 # utils.write_image(frame)
                 # utils.write_image(thresh, class_name = 'thresh')
                 write_timeout = curr + 20 * 1
-                print("Finished Yolov3")
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
             #     yolo.run_yolo(
@@ -141,8 +119,11 @@ def motion_detector(ip_cam, show_frames=False):
 
         # show the frame and record if the user presses a key
         if show_frames:
-            feed = np.concatenate((frame_gray, thresh), axis=0)
-            # Show -> resized_frame, cropped_frame, masked_frame, thresh, delta
+            # Show -> resized_frame, masked_frame, thresh, 
+            orig_frame_gray = cv2.cvtColor(imutils.resize(frame, width=500), cv2.COLOR_BGR2GRAY)
+            feed = np.concatenate((orig_frame_gray, masked_frame, thresh), axis=0)
+            # Show -> masked_frame, blurred_frame, thresh, 
+            # feed = np.concatenate((masked_frame, blurred_frame, thresh), axis=0)
             cv2.imshow("Security Feed", feed)
 
         # if the `q` key is pressed, break from the loop
