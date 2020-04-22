@@ -158,8 +158,7 @@ def run_yolo(net, cap, coco_classes, duration=None, show_frame=False, save_image
             cap.grab()
         hasFrame, frame = cap.read()
 
-        # Crop the frame
-        # (y_min, y_max) (x_min, x_max)
+        # Crop frame -> [y_min:y_max, x_min:x_max]
         frame = frame[300:1080, 200:1920] # Classifying people
         # frame = frame[0:500, 0:1920]  # Classifying Cars
 
