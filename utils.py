@@ -17,6 +17,7 @@ def crop_and_resize_frame(frame, crop_dimensions=(175, 1080, 250, 1920)):
         nd_array -- resulting image frame
     """
     y_min, y_max, x_min, x_max = crop_dimensions
+    # Crop frame -> [y_min:y_max, x_min:x_max]
     return imutils.resize(frame[y_min:y_max, x_min:x_max], width=500)
 
 def write_image(frame, class_name=None, dimensions=None):

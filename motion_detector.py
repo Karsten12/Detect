@@ -106,8 +106,8 @@ def motion_detector(ip_cam, show_frames=False):
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 15 seconds
                 print("Writing image")
-                # utils.write_image(frame)
-                # utils.write_image(thresh, class_name = 'thresh')
+                utils.write_image(frame)
+                utils.write_image(thresh, class_name = 'thresh')
                 write_timeout = curr + 20 * 1
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
@@ -167,8 +167,8 @@ if __name__ == "__main__":
 
     print("Starting motion detection...")
 
-    # motion_detector(ip_cams[1], show_frames)
-    motion_detector('vid_out_trim.mp4', show_frames)
+    motion_detector(ip_cams[1], show_frames)
+    # motion_detector('vid_out_trim.mp4', show_frames)
 
 
     # #!/usr/bin/env python3 to top of file
