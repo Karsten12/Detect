@@ -1,4 +1,3 @@
-#!/usr/bin/python3.7
 import imutils
 import cv2
 import json
