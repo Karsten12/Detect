@@ -1,3 +1,4 @@
+#!/usr/bin/python3.7
 import imutils
 import cv2
 import json
@@ -106,8 +107,8 @@ def motion_detector(ip_cam, show_frames=False):
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 15 seconds
                 print("Writing image")
-                utils.write_image(frame)
-                utils.write_image(thresh, class_name = 'thresh')
+                utils.write_image(frame, directory = 'output_images/motion')
+                utils.write_image(thresh, directory = 'output_images/motion', class_name = 'thresh')
                 write_timeout = curr + 20 * 1
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
@@ -139,8 +140,8 @@ def motion_detector(ip_cam, show_frames=False):
 if __name__ == "__main__":
 
     # Redirect the console and error to files for later viewing
-    # sys.stdout = open('out.txt', 'w')
-    # sys.stderr = open('error.txt', 'w')
+    sys.stdout = open('logs/out.txt', 'w')
+    sys.stderr = open('logs/error.txt', 'w')
 
     # Load details
     with open("config.json") as f:
@@ -152,6 +153,7 @@ if __name__ == "__main__":
     ip_cams = config_dict["ip_cams"]
 
     if ip_cams is None:
+        utils.print_err('ip cams is none')
         exit()
 
     show_frames = config_dict["show_frames"]
@@ -169,8 +171,3 @@ if __name__ == "__main__":
 
     motion_detector(ip_cams[1], show_frames)
     # motion_detector('vid_out_trim.mp4', show_frames)
-
-
-    # #!/usr/bin/env python3 to top of file
-    # chmod +x motion_detector.py
-    # Run using -> nohup timeout 10 motion_detector &
