@@ -115,7 +115,7 @@ def postprocess(frame, outs, show_frame=False, save_image=False):
         if save_image:
             class_name = classes[classIds[i]]
             dimensions = (top, top + height, left, left + width)
-            utils.write_image(frame, 'output_images/yolo', class_name, dimensions)
+            utils.write_image(frame, 'output/yolo', class_name, dimensions)
         if show_frame:
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
@@ -205,6 +205,7 @@ if __name__ == "__main__":
     ip_cams = config_dict["ip_cams"]
 
     if ip_cams is None:
+        utils.print_err('ip cams is none')
         exit()
 
     show_frames = config_dict["show_frames"]

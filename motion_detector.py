@@ -107,8 +107,8 @@ def motion_detector(ip_cam, show_frames=False):
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 15 seconds
                 print("Writing image")
-                utils.write_image(frame, directory = 'output_images/motion')
-                utils.write_image(thresh, directory = 'output_images/motion', class_name = 'thresh')
+                utils.write_image(frame, directory = 'output/motion')
+                utils.write_image(thresh, directory = 'output/motion', class_name = 'thresh')
                 write_timeout = curr + 20 * 1
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
@@ -140,8 +140,8 @@ def motion_detector(ip_cam, show_frames=False):
 if __name__ == "__main__":
 
     # Redirect the console and error to files for later viewing
-    sys.stdout = open('logs/out.txt', 'w')
-    sys.stderr = open('logs/error.txt', 'w')
+    sys.stdout = open('output/logs/out.txt', 'w')
+    sys.stderr = open('output/logs/error.txt', 'w')
 
     # Load details
     with open("config.json") as f:
