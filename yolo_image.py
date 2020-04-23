@@ -163,7 +163,7 @@ def run_yolo(net, image, coco_classes, save_image=False):
     # Get the overall time for inference(t) and the timings for each of the layers(in layersTimes)
     t, _ = net.getPerfProfile()
     label = "Inference time: %.2f ms" % (t * 1000.0 / cv2.getTickFrequency())
-    cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
+    # cv2.putText(frame, label, (0, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
     print(label)
 
     # Save image with all bounding boxes

@@ -39,7 +39,15 @@ def motion_detector(ip_cam, show_frames=False):
     im_mask = utils.crop_and_resize_frame(mask_image)
 
     # loop over the frames of the video
+    skip_frame = False
     while True:
+        # Skip every other frame to improve performance
+        if skip_frame:
+            skip_frame = False
+            cap.grab()
+            continue
+        skip_frame = True
+
         # grab current frame
         status, frame = cap.read()
 
