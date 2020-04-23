@@ -27,10 +27,8 @@ def motion_detector(ip_cam, show_frames=False):
     avg = None
 
     motionCounter = 0
-    min_motion_frames = (
-        20  # min number of frames with motion needed to trigger detection
-    )
-    delta_thresh = 10  # min value a pixel must be to trigger movement
+    min_motion_frames = 20  # min num of frames w/ motion to trigger detection
+    delta_thresh = 10  # min value pixel must be to trigger movement
     min_area = 50  # min area to trigger detection
     blur_kernel = (21, 21)
     write_timeout = 0
@@ -125,7 +123,7 @@ def motion_detector(ip_cam, show_frames=False):
             # print("Finished Yolov3")
             motionCounter = 0
 
-        # show the frame and record if the user presses a key
+        # show the frames
         if show_frames:
             # Show -> resized_frame, masked_frame, thresh,
             orig_frame_gray = cv2.cvtColor(
@@ -136,10 +134,10 @@ def motion_detector(ip_cam, show_frames=False):
             # feed = np.concatenate((masked_frame, blurred_frame, thresh), axis=0)
             cv2.imshow("Security Feed", feed)
 
-        # if the `q` key is pressed, break from the loop
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
-            break
+            # if the `q` key is pressed, break from the loop
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
+                break
 
     # cleanup the camera and close any open windows
     cap.release()
