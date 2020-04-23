@@ -115,7 +115,7 @@ def postprocess(frame, outs, save_image=False):
             # Save cropped image of detected object
             class_name = classes[classIds[i]]
             dimensions = (top, top + height, left, left + width)
-            utils.write_image(frame, 'output/yolo', class_name, dimensions)
+            utils.write_image(frame, "output/yolo", class_name, dimensions)
         drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
 

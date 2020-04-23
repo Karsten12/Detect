@@ -115,7 +115,7 @@ def postprocess(frame, outs, show_frame=False, save_image=False):
         if save_image:
             class_name = classes[classIds[i]]
             dimensions = (top, top + height, left, left + width)
-            utils.write_image(frame, 'output/yolo', class_name, dimensions)
+            utils.write_image(frame, "output/yolo", class_name, dimensions)
         if show_frame:
             drawPred(classIds[i], confidences[i], left, top, left + width, top + height)
 
@@ -159,7 +159,7 @@ def run_yolo(net, cap, coco_classes, duration=None, show_frame=False, save_image
         hasFrame, frame = cap.read()
 
         # Crop frame -> [y_min:y_max, x_min:x_max]
-        frame = frame[300:1080, 200:1920] # Classifying people
+        frame = frame[300:1080, 200:1920]  # Classifying people
         # frame = frame[0:500, 0:1920]  # Classifying Cars
 
         # Stop the program if reached end of video
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     ip_cams = config_dict["ip_cams"]
 
     if ip_cams is None:
-        utils.print_err('ip cams is none')
+        utils.print_err("ip cams is none")
         exit()
 
     show_frames = config_dict["show_frames"]

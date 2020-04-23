@@ -7,6 +7,7 @@ from datetime import datetime
 def print_err(out):
     print(out, file=sys.stderr)
 
+
 def crop_and_resize_frame(frame, crop_dimensions=(175, 1080, 250, 1920)):
     """ Crop unimportant parts of frame, then resizes. Default crop detects people
 
@@ -23,6 +24,7 @@ def crop_and_resize_frame(frame, crop_dimensions=(175, 1080, 250, 1920)):
     # Crop frame -> [y_min:y_max, x_min:x_max]
     return imutils.resize(frame[y_min:y_max, x_min:x_max], width=500)
 
+
 def write_image(frame, directory=None, class_name=None, dimensions=None):
     """ Writes the frame as a png file
     
@@ -37,9 +39,9 @@ def write_image(frame, directory=None, class_name=None, dimensions=None):
 
     fileName = datetime.now().strftime("%m-%d-%Y--%H-%M-%S") + ".png"
     if class_name:
-        fileName = class_name + '_' + fileName
+        fileName = class_name + "_" + fileName
     if directory:
-        fileName = directory + '/' + fileName
+        fileName = directory + "/" + fileName
     outFile = frame
     if dimensions:
         top, bottom, left, right = dimensions

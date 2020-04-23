@@ -10,6 +10,7 @@ import sys
 import yolo
 import utils
 
+
 def motion_detector(ip_cam, show_frames=False):
     """ Detects motion from the video feed of ip_cam, and if motion calls YoloV3 to do object recognition 
 	
@@ -26,16 +27,18 @@ def motion_detector(ip_cam, show_frames=False):
     avg = None
 
     motionCounter = 0
-    min_motion_frames = 20 # min number of frames with motion needed to trigger detection 
-    delta_thresh = 10 # min value a pixel must be to trigger movement
-    min_area = 50 # min area to trigger detection
+    min_motion_frames = (
+        20  # min number of frames with motion needed to trigger detection
+    )
+    delta_thresh = 10  # min value a pixel must be to trigger movement
+    min_area = 50  # min area to trigger detection
     blur_kernel = (21, 21)
     write_timeout = 0
 
     kernel = np.ones((3, 3), np.uint8)
 
-    # Read in mask 
-    mask_image = cv2.imread('images/mask.png', cv2.IMREAD_GRAYSCALE)
+    # Read in mask
+    mask_image = cv2.imread("images/mask.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
 
     # loop over the frames of the video
@@ -61,10 +64,10 @@ def motion_detector(ip_cam, show_frames=False):
         # Crop and resize and convert frame to grayscale
         cropped_frame = utils.crop_and_resize_frame(frame)
         frame_gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
- 
-        # Mask out the areas that are not important 
-        masked_frame = cv2.bitwise_and(frame_gray, frame_gray, mask = im_mask)
-        # Blur 
+
+        # Mask out the areas that are not important
+        masked_frame = cv2.bitwise_and(frame_gray, frame_gray, mask=im_mask)
+        # Blur
         blurred_frame = cv2.GaussianBlur(masked_frame, blur_kernel, 0)
 
         # if the average frame is None, initialize it
@@ -109,8 +112,10 @@ def motion_detector(ip_cam, show_frames=False):
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 15 seconds
                 print("Writing image")
-                utils.write_image(frame, directory = 'output/motion')
-                utils.write_image(thresh, directory = 'output/motion', class_name = 'thresh')
+                utils.write_image(frame, directory="output/motion")
+                utils.write_image(
+                    thresh, directory="output/motion", class_name="thresh"
+                )
                 write_timeout = curr + 20 * 1
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
@@ -122,10 +127,12 @@ def motion_detector(ip_cam, show_frames=False):
 
         # show the frame and record if the user presses a key
         if show_frames:
-            # Show -> resized_frame, masked_frame, thresh, 
-            orig_frame_gray = cv2.cvtColor(imutils.resize(frame, width=500), cv2.COLOR_BGR2GRAY)
+            # Show -> resized_frame, masked_frame, thresh,
+            orig_frame_gray = cv2.cvtColor(
+                imutils.resize(frame, width=500), cv2.COLOR_BGR2GRAY
+            )
             feed = np.concatenate((orig_frame_gray, masked_frame, thresh), axis=0)
-            # Show -> masked_frame, blurred_frame, thresh, 
+            # Show -> masked_frame, blurred_frame, thresh,
             # feed = np.concatenate((masked_frame, blurred_frame, thresh), axis=0)
             cv2.imshow("Security Feed", feed)
 
@@ -153,13 +160,13 @@ if __name__ == "__main__":
     logs_to_file = config_dict["logs_to_file"]
 
     if ip_cams is None:
-        utils.print_err('ip cams is none')
+        utils.print_err("ip cams is none")
         exit()
 
     if logs_to_file:
         # Redirect the console and error to files for later viewing
-        sys.stdout = open('output/logs/out.txt', 'w')
-        sys.stderr = open('output/logs/error.txt', 'w')
+        sys.stdout = open("output/logs/out.txt", "w")
+        sys.stderr = open("output/logs/error.txt", "w")
 
     show_frames = config_dict["show_frames"]
     use_yolov3 = config_dict["yolov3"]
