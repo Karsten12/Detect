@@ -13,6 +13,7 @@ if __name__ == "__main__":
     frame_gray = cv2.GaussianBlur(frame_gray, (21, 21), 0)
     im_mask = cv2.threshold(frame_gray, 0, 255, cv2.THRESH_BINARY)[1]
     cv2.imwrite("mask.png", im_mask)
+    exit()
 
     # Apply mask to sample image
     sample = cv2.imread(sample_file)

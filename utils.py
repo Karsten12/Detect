@@ -8,7 +8,7 @@ def print_err(out):
     print(out, file=sys.stderr)
 
 
-def crop_and_resize_frame(frame, crop_dimensions=(175, 1080, 250, 1920)):
+def crop_and_resize_frame(frame, crop_dimensions=(200, 1080, 250, 1920)):
     """ Crop unimportant parts of frame, then resizes. Default crop detects people
 
     Arguments:
