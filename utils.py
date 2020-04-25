@@ -5,7 +5,23 @@ from datetime import datetime
 
 
 def print_err(out):
+    """ Print out an a string to stderr
+
+    Arguments:
+        out {str} -- The string to print
+    """
     print(out, file=sys.stderr)
+
+def get_padding_detection(frame, thresh):
+    """ Return a locally cropped area (padded w/ .. ) of the motion detected in thresh
+
+    Arguments:
+        frame {[type]} -- [description]
+        thresh {[type]} -- [description]
+    """
+
+    # TODO 
+    return None
 
 
 def crop_and_resize_frame(frame, crop_dimensions=(200, 1080, 250, 1920)):

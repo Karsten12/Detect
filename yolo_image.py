@@ -102,7 +102,7 @@ def postprocess(frame, outs, save_image=False):
     for i in indices:
         i = i[0]
         # Skip classes that aren't cars
-        if classIds[i] != 2:
+        if classIds[i] != 0:
             continue
         box = boxes[i]
         left = box[0]
