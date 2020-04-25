@@ -2,7 +2,6 @@ import imutils
 import cv2
 import json
 import time
-from datetime import datetime
 import numpy as np
 import sys
 
@@ -26,14 +25,14 @@ def motion_detector(ip_cam, show_frames=False):
     # initialize the frame in the video stream
     avg = None
 
-    motionCounter = 0
+    motion_count = 0
     min_motion_frames = 20  # min num of frames w/ motion to trigger detection
     delta_thresh = 10  # min value pixel must be to trigger movement
     min_area = 50  # min area to trigger detection
     blur_kernel = (21, 21)
     write_timeout = 0
 
-    kernel = np.ones((3, 3), np.uint8)
+    np.ones((3, 3), np.uint8)
 
     # Read in mask
     mask_image = cv2.imread("images/mask.png", cv2.IMREAD_GRAYSCALE)
@@ -42,8 +41,8 @@ def motion_detector(ip_cam, show_frames=False):
     # loop over the frames of the video
     skip_frame = False
     while True:
-        # Skip every other frame to improve performance
-        if skip_frame:
+        # Skip every other frame (for performance) until motion detected
+        if skip_frame and not motion_count:
             skip_frame = False
             cap.grab()
             continue
@@ -99,11 +98,11 @@ def motion_detector(ip_cam, show_frames=False):
             motion = True
 
         if motion:
-            motionCounter += 1
+            motion_count += 1
         else:
-            motionCounter = 0
+            motion_count = 0
 
-        if motionCounter >= min_motion_frames:
+        if motion_count >= min_motion_frames:
             # Do YOLO detection for 15 seconds
             # print("Running Yolov3 detection")
             curr = time.time()
@@ -121,7 +120,7 @@ def motion_detector(ip_cam, show_frames=False):
             #         net, cap, classes, yolo_timeout, show_frame=False, store_image=True
             #     )
             # print("Finished Yolov3")
-            motionCounter = 0
+            motion_count = 0
 
         # show the frames
         if show_frames:

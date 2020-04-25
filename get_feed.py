@@ -1,5 +1,6 @@
 from threading import Thread
-import cv2, datetime, time, json
+import cv2
+import json
 
 
 class VideoStreamWidget(object):
