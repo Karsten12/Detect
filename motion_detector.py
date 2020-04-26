@@ -56,7 +56,7 @@ def motion_detector(ip_cam, show_frames=False):
         # Assume no motion
         motion = False
 
-        # Crop and resize and convert frame to grayscale
+        # Crop, resize and convert frame to grayscale
         cropped_frame = utils.crop_and_resize_frame(frame)
         frame_gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
 
