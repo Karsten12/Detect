@@ -5,6 +5,8 @@ from datetime import datetime
 
 y_crop = 200  # Crop in the image 200 from the top
 x_crop = 250  # Crop in the image 250 from the left
+frame_min = 0
+frame_max_x, frame_max_y = 1920, 1080
 
 
 def print_err(out):
@@ -20,8 +22,8 @@ def get_padding_detection(frame, thresh):
     """ Return a locally cropped area (padded w/ .. ) of the motion detected in thresh
 
     Arguments:
-        frame {[type]} -- [description]
-        thresh {[type]} -- [description]
+        frame {nd_array} -- Image frame
+        thres {nd_array} -- The detection frame
     """
     frame_im = cv2.imread(frame)
     thresh_im = cv2.imread(thresh, cv2.IMREAD_GRAYSCALE)
@@ -43,14 +45,16 @@ def get_padding_detection(frame, thresh):
     y += y_crop
     # Pad bounding box
     x_pad, y_pad = 100, 125
-    y_min, y_max, x_min, x_max = (y - y_pad, y + h + y_pad, x - x_pad, x + w + x_pad)
+    # Ensure that padding doesn't extend beyond frame
+    y_min, y_max = max(y - y_pad, frame_min), min(y + h + y_pad, frame_max_y)
+    x_min, x_max = max(x - x_pad, frame_min), min(x + w + x_pad, frame_max_x)
 
     # Crop out the rectangle and write it
     cropped_object = frame_im[y_min:y_max, x_min:x_max]
-    write_image(cropped_object)
+    # write_image(cropped_object)
 
     # Display rectangle (w/ padding)
-    # im = cv2.rectangle(frame_im, (x_min, y_min), (x_max, y_max), (0, 255, 0), 1)
+    # im = cv2.rectangle(frame_im, (x_min, y_min), (x_max, y_max), (255, 0, 0), 1)
     # cv2.imshow("temp", im)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
@@ -59,7 +63,9 @@ def get_padding_detection(frame, thresh):
     return None
 
 
-def crop_and_resize_frame(frame, crop_dimensions=(y_crop, 1080, x_crop, 1920)):
+def crop_and_resize_frame(
+    frame, crop_dimensions=(y_crop, frame_max_y, x_crop, frame_max_x)
+):
     """ Crop unimportant parts of frame, then resizes. Default crop detects people
 
     Arguments:

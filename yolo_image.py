@@ -101,7 +101,7 @@ def postprocess(frame, outs, save_image=False):
     indices = cv2.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
     for i in indices:
         i = i[0]
-        # Skip classes that aren't cars
+        # Skip classes that aren't people
         if classIds[i] != 0:
             continue
         box = boxes[i]

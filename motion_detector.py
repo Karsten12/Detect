@@ -33,7 +33,7 @@ def motion_detector(ip_cam, show_frames=False):
     write_timeout = 0
 
     # Read in mask
-    mask_image = cv2.imread("images/mask.png", cv2.IMREAD_GRAYSCALE)
+    mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
 
     # loop over the frames of the video
