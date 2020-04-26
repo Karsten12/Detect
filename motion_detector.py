@@ -32,8 +32,6 @@ def motion_detector(ip_cam, show_frames=False):
     blur_kernel = (21, 21)
     write_timeout = 0
 
-    np.ones((3, 3), np.uint8)
-
     # Read in mask
     mask_image = cv2.imread("images/mask.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
@@ -107,12 +105,9 @@ def motion_detector(ip_cam, show_frames=False):
             # print("Running Yolov3 detection")
             curr = time.time()
             if curr > write_timeout:
-                # Ensure only 1 image gets written every 15 seconds
+                # Ensure only 1 image gets written every 20 seconds
                 print("Writing image")
-                utils.write_image(frame, directory="output/motion")
-                utils.write_image(
-                    thresh, directory="output/motion", class_name="thresh"
-                )
+                utils.write_frame_and_thresh(frame, thresh)
                 write_timeout = curr + 20 * 1
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
