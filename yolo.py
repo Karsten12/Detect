@@ -197,7 +197,7 @@ def run_yolo(net, cap, coco_classes, duration=None, show_frame=False, save_image
 if __name__ == "__main__":
 
     # Load details
-    with open("config.json") as f:
+    with open("config/config.json") as f:
         config_dict = json.load(f)
 
     # Load links to ip cams
@@ -213,8 +213,8 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(str(ip_cams[1]))
 
     # Load details for darknet
-    modelConfiguration = "yolov3.cfg"
-    modelWeights = "yolov3.weights"
+    modelConfiguration = "config/yolov3.cfg"
+    modelWeights = "config/yolov3.weights"
 
     net = cv2.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
     net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)

@@ -141,7 +141,7 @@ def motion_detector(ip_cam, show_frames=False):
 if __name__ == "__main__":
 
     # Load details
-    with open("config.json") as f:
+    with open("config/config.json") as f:
         config_dict = json.load(f)
 
     # Load the classes
@@ -174,4 +174,4 @@ if __name__ == "__main__":
     print("Starting motion detection...")
 
     motion_detector(ip_cams[1], show_frames)
-    # motion_detector('vid_out_trim.mp4', show_frames)
+    # motion_detector('images/vid_out_trim.mp4', show_frames)
