@@ -83,8 +83,6 @@ def motion_detector(ip_cam, show_frames=False):
 
         # dilate the thresholded image to fill in holes, then find contours on thresholded image
         thresh = cv2.dilate(thresh, None, iterations=2)
-        # thresh = cv2.dilate(thresh, kernel, iterations=2)
-        # thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
         cnts = cv2.findContours(
             thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
@@ -102,6 +100,8 @@ def motion_detector(ip_cam, show_frames=False):
             motion_count += 1
         else:
             motion_count = 0
+            # Sync up VideoCapture with latest frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
         if motion_count >= min_motion_frames:
             # Do YOLO detection for 15 seconds
