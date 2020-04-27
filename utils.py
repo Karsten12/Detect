@@ -23,7 +23,7 @@ def get_padding_detection(frame, thresh):
 
     Arguments:
         frame {nd_array} -- Image frame
-        thres {nd_array} -- The detection frame
+        thresh {nd_array} -- The detection frame
     """
     frame_im = cv2.imread(frame)
     thresh_im = cv2.imread(thresh, cv2.IMREAD_GRAYSCALE)
