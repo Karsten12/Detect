@@ -29,23 +29,23 @@ def motion_detector(ip_cam, show_frames=False):
     min_motion_frames = 20  # min num of frames w/ motion to trigger detection
     delta_thresh = 10  # min value pixel must be to trigger movement
     min_area = 50  # min area to trigger detection
-    blur_kernel = (21, 21)
     write_timeout = 0
 
     # Read in mask
     mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
 
-    # loop over the frames of the video
     skip_frame = False
 
     # Skip to the most recent frame
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    # loop over the frames of the video
     while True:
         # Skip every other frame (for performance) until motion detected
         if skip_frame and not motion_count:
             skip_frame = False
-            cap.grab()
+            # Sync up VideoCapture with latest frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
         skip_frame = True
 
@@ -66,7 +66,7 @@ def motion_detector(ip_cam, show_frames=False):
         # Mask out the areas that are not important
         masked_frame = cv2.bitwise_and(frame_gray, frame_gray, mask=im_mask)
         # Blur
-        blurred_frame = cv2.GaussianBlur(masked_frame, blur_kernel, 0)
+        blurred_frame = cv2.GaussianBlur(masked_frame, (21, 21), 0)
 
         # if the average frame is None, initialize it
         if avg is None:
@@ -121,22 +121,6 @@ def motion_detector(ip_cam, show_frames=False):
             #     )
             # print("Finished Yolov3")
             motion_count = 0
-
-        # show the frames
-        if show_frames:
-            # Show -> resized_frame, masked_frame, thresh,
-            orig_frame_gray = cv2.cvtColor(
-                imutils.resize(frame, width=500), cv2.COLOR_BGR2GRAY
-            )
-            feed = np.concatenate((orig_frame_gray, masked_frame, thresh), axis=0)
-            # Show -> masked_frame, blurred_frame, thresh,
-            # feed = np.concatenate((masked_frame, blurred_frame, thresh), axis=0)
-            cv2.imshow("Security Feed", feed)
-
-            # if the `q` key is pressed, break from the loop
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord("q"):
-                break
 
     # cleanup the camera and close any open windows
     cap.release()
