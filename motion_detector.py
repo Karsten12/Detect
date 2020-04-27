@@ -99,8 +99,10 @@ def motion_detector(ip_cam, show_frames=False):
             if cv2.contourArea(c) < min_area:
                 # if the contour is too small, ignore it
                 continue
-
-            motion = True
+            else:
+                # Motion detected
+                motion = True
+                break
 
         if motion:
             motion_count += 1
