@@ -35,25 +35,18 @@ def motion_detector(ip_cam, show_frames=False):
     mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
 
-    # skip_frame = False
+    skip_frame = False
 
     # Skip to the most recent frame
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     # loop over the frames of the video
-    while True:
-        # V2 (need to check v1 first)
-        if not motion_count:
-            # Sync up VideoCapture with latest frame
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        
-        # V1
+    while True:    
         # Skip every other frame (for performance) until motion detected
-        # if skip_frame and not motion_count:
-        #     skip_frame = False
-        #     # Sync up VideoCapture with latest frame
-        #     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        #     continue
-        # skip_frame = True
+        if skip_frame and not motion_count:
+            skip_frame = False
+            cap.grab()
+            continue
+        skip_frame = True
 
         # grab current frame
         status, frame = cap.read()
@@ -108,9 +101,8 @@ def motion_detector(ip_cam, show_frames=False):
             motion_count += 1
         else:
             motion_count = 0
-            # V1
             # Sync up VideoCapture with latest frame
-            # cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
         if motion_count >= min_motion_frames:
             # Do YOLO detection for 15 seconds
@@ -118,7 +110,7 @@ def motion_detector(ip_cam, show_frames=False):
             curr = time.time()
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 20 seconds
-                print("Writing image")
+                # print("Writing image")
                 utils.write_frame_and_thresh(frame, thresh)
                 write_timeout = curr + 20 * 1
                 # Sync up VideoCapture with latest frame
