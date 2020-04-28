@@ -3,10 +3,16 @@ import cv2
 import imutils
 from datetime import datetime
 
-y_crop = 200  # Crop in the image 200 from the top
-x_crop = 250  # Crop in the image 250 from the left
-frame_min = 0
+# For a 1920 x 1080 (1080p) feed
 frame_max_x, frame_max_y = 1920, 1080
+frame_min = 0
+
+# 0 <= Y <= 1080
+y_crop_min = 200  # start crop 200 from the top
+y_crop_max = 650  # end crop 650 from the top
+
+# 0 <= X <= 1920
+x_crop_min = 450  # start crop 450 from the left (NEW MASK), 250 is for OLD MASK
 
 
 def print_err(out):
@@ -28,7 +34,12 @@ def get_padding_detection(frame, thresh):
     frame_im = cv2.imread(frame)
     thresh_im = cv2.imread(thresh, cv2.IMREAD_GRAYSCALE)
 
-    upscaled_width = 1920 - x_crop
+    # account for old mask shape
+    if thresh_im.shape == (263, 500):
+        x_crop_min = 250
+
+    # Scale up (back) the thresh image to its original size post crop
+    upscaled_width = 1920 - x_crop_min
     new_thresh_im = imutils.resize(thresh_im, width=upscaled_width)
 
     # Calculate the coordinates of the detection
@@ -40,9 +51,9 @@ def get_padding_detection(frame, thresh):
 
     # Get the bounding box from the coordinates
     x, y, w, h = cv2.boundingRect(cnts[0])
-    # Move bounding box by to compensate for crop
-    x += x_crop
-    y += y_crop
+    # Move bounding box to compensate for crop
+    x += x_crop_min
+    y += y_crop_min
     # Pad bounding box
     x_pad, y_pad = 100, 125
     # Ensure that padding doesn't extend beyond frame
@@ -54,7 +65,7 @@ def get_padding_detection(frame, thresh):
     # write_image(cropped_object)
 
     # Display rectangle (w/ padding)
-    # im = cv2.rectangle(frame_im, (x_min, y_min), (x_max, y_max), (255, 0, 0), 1)
+    # im = cv2.rectangle(frame_im, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
     # cv2.imshow("temp", im)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
@@ -64,7 +75,7 @@ def get_padding_detection(frame, thresh):
 
 
 def crop_and_resize_frame(
-    frame, crop_dimensions=(y_crop, frame_max_y, x_crop, frame_max_x)
+    frame, crop_dimensions=(y_crop_min, y_crop_max, x_crop_min, frame_max_x)
 ):
     """ Crop unimportant parts of frame, then resizes. Default crop detects people
 
@@ -72,7 +83,7 @@ def crop_and_resize_frame(
         frame {nd_array} -- Image frame
 
     Keyword Arguments:
-        crop_dimensions {tuple} -- The dimensions to crop the frame (default: {(200, 1080, 250, 1920)})
+        crop_dimensions {tuple} -- The dimensions to crop the frame (default: {(y_crop_min, y_crop_max, x_crop_min, frame_max_x)})
 
     Returns:
         nd_array -- resulting image frame

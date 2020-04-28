@@ -40,7 +40,7 @@ def motion_detector(ip_cam, show_frames=False):
     # Skip to the most recent frame
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     # loop over the frames of the video
-    while True:    
+    while True:
         # Skip every other frame (for performance) until motion detected
         if skip_frame and not motion_count:
             skip_frame = False
@@ -49,7 +49,7 @@ def motion_detector(ip_cam, show_frames=False):
         skip_frame = True
 
         # grab current frame
-        status, frame = cap.read()
+        _, frame = cap.read()
 
         # if frame not available, exit
         if frame is None:
@@ -112,7 +112,7 @@ def motion_detector(ip_cam, show_frames=False):
                 # Ensure only 1 image gets written every 20 seconds
                 # print("Writing image")
                 utils.write_frame_and_thresh(frame, thresh)
-                write_timeout = curr + 20 * 1
+                write_timeout = curr + 20
                 # Sync up VideoCapture with latest frame
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             # yolo_timeout = time.time() + 15 * 1

@@ -165,7 +165,7 @@ def run_yolo(net, image, coco_classes, save_image=False):
     print(label)
 
     # Save image with all bounding boxes
-    utils.write_image(frame)
+    # utils.write_image(frame)
 
 
 if __name__ == "__main__":
@@ -183,4 +183,4 @@ if __name__ == "__main__":
     net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
     image = "temp.png"
-    run_yolo(net, image, config_dict["coco_classes"], save_image=True)
+    run_yolo(net, image, config_dict["coco_classes"], save_image=False)
