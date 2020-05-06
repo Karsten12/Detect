@@ -2,6 +2,7 @@ import sys
 import cv2
 import imutils
 from datetime import datetime
+import smtplib
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -19,7 +20,7 @@ x_crop_min = 450  # start crop 450 from the left (NEW MASK), 250 is for OLD MASK
 
 carriers = {
     "sprint_SMS": "@messaging.sprintpcs.com",
-    "sprint_MMS": "@pm.sprint.com",
+    # "sprint_MMS": "@pm.sprint.com",
 }
 
 
@@ -69,17 +70,17 @@ def get_padding_detection(frame, thresh):
     x_min, x_max = max(x - x_pad, frame_min), min(x + w + x_pad, frame_max_x)
 
     # Crop out the rectangle and write it
-    cropped_object = frame_im[y_min:y_max, x_min:x_max]
+    # cropped_object = frame_im[y_min:y_max, x_min:x_max]
     # write_image(cropped_object)
 
-    # Display rectangle (w/ padding)
-    # im = cv2.rectangle(frame_im, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
+    # Add bounding box (w/ padding) to image
+    im = cv2.rectangle(frame_im, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
     # cv2.imshow("temp", im)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
 
-    # TODO
-    return None
+    # Return image w/ bounding box
+    return im
 
 
 def crop_and_resize_frame(
@@ -147,26 +148,33 @@ def login_server(auth):
 def get_recipients_from_numbers(phone_numbers):
     formatted_numbers = []
     for number in phone_numbers:
-        tmp = str(number) + carriers["sprint_MMS"]
-        formatted_numbers.appen(tmp)
+        tmp = str(number) + carriers["sprint_SMS"]
+        formatted_numbers.append(tmp)
 
     return formatted_numbers
 
 
-def send_message(server, recipients, message, frame=None):
+def send_message(auth, recipients, frame=None, thresh=None):
+
+    server = login_server(auth)
+
+    to_list = get_recipients_from_numbers(recipients)
 
     msg = MIMEMultipart()
 
-    text = "Motion detected at {}".format(message)
+    text = "Motion detected at {}".format(datetime.now().strftime("%m-%d-%Y--%H-%M-%S"))
 
     # Include text
     msg.attach(MIMEText(text))
 
     # If image, include it
     if frame:
-        img_str = cv2.imencode(".png", frame)[1].tostring()
+        img = get_padding_detection(frame, thresh)
+        img_str = cv2.imencode(".png", img)[1].tostring()
         msg.attach(MIMEImage(img_str))
 
     msg_to_send = msg.as_string()
 
-    server.sendmail(auth[0], recipients, msg_to_send)
+    # Send SMS/MMS
+    server.sendmail(auth[0], to_list, msg_to_send)
+    server.quit()

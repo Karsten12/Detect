@@ -4,20 +4,18 @@ import json
 import time
 import numpy as np
 import sys
+import threading
 
 # import custom files
 import yolo
 import utils
 
 
-def motion_detector(ip_cam, show_frames=False):
+def motion_detector(ip_cam):
     """ Detects motion from the video feed of ip_cam, and if motion calls YoloV3 to do object recognition 
 	
 	Arguments:
 		ip_cam {str} -- The rtsp url to the live camera feed
-	
-	Keyword Arguments:
-		show_frames {bool} -- Whether or not to display the feed and the output (default: {False})
 	"""
 
     cap = cv2.VideoCapture(ip_cam)
@@ -112,6 +110,7 @@ def motion_detector(ip_cam, show_frames=False):
                 # Ensure only 1 image gets written every 20 seconds
                 # print("Writing image")
                 utils.write_frame_and_thresh(frame, thresh)
+                # send_sms_async(frame, thresh)
                 write_timeout = curr + 20
                 # Sync up VideoCapture with latest frame
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -128,18 +127,29 @@ def motion_detector(ip_cam, show_frames=False):
     cv2.destroyAllWindows()
 
 
+def send_sms_async(frame, thresh):
+    # Send SMS in another thread
+    sms_args = {
+        "auth": sms_auth,
+        "recipients": sms_reciepients
+        "frame": frame.copy(),
+        "thresh": thresh.copy(),
+    }
+    utils.send_message(sms_auth, sms_reciepients)
+    t = threading.Thread(target=utils.send_message, kwargs=sms_args)
+    t.start()
+
+
 if __name__ == "__main__":
 
-    # Load details
+    # --- Load options from config ---
     with open("config/config.json") as f:
         config_dict = json.load(f)
-
-    # Load the classes
-    classes = config_dict["coco_classes"]
-    # Load links to ip cams
-    ip_cams = config_dict["ip_cams"]
-    # Decide whether to output logs to console or file
-    logs_to_file = config_dict["logs_to_file"]
+    ip_cams = config_dict["ip_cams"]  # links to ip cams
+    logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)
+    use_yolov3 = config_dict["yolov3"]  # Use yolov3?
+    classes = config_dict["coco_classes"]  # Classes for yolov3
+    send_sms = config_dict["send_sms"]  # Use sms notification?
 
     if ip_cams is None:
         utils.print_err("ip cams is none")
@@ -150,9 +160,6 @@ if __name__ == "__main__":
         sys.stdout = open("output/logs/out.txt", "w")
         sys.stderr = open("output/logs/error.txt", "w")
 
-    show_frames = config_dict["show_frames"]
-    use_yolov3 = config_dict["yolov3"]
-
     if use_yolov3:
         modelConfiguration = "yolov3.cfg"
         modelWeights = "yolov3.weights"
@@ -161,7 +168,11 @@ if __name__ == "__main__":
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
+    if send_sms:
+        sms_auth = config_dict["sms_auth"]
+        sms_reciepients = config_dict["sms_reciepients"]
+
     print("Starting motion detection...")
 
-    motion_detector(ip_cams[1], show_frames)
+    motion_detector(ip_cams[1])
     # motion_detector('images/vid_out_trim.mp4', show_frames)
