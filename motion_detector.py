@@ -9,6 +9,7 @@ import threading
 # import custom files
 import yolo
 import utils
+from videostream import VideoStream
 
 
 def motion_detector(ip_cam):
@@ -18,7 +19,7 @@ def motion_detector(ip_cam):
 		ip_cam {str} -- The rtsp url to the live camera feed
 	"""
 
-    cap = cv2.VideoCapture(ip_cam)
+    cap = VideoStream(ip_cam).start()
 
     # initialize the frame in the video stream
     avg = None
@@ -35,19 +36,16 @@ def motion_detector(ip_cam):
 
     skip_frame = False
 
-    # Skip to the most recent frame
-    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     # loop over the frames of the video
     while True:
         # Skip every other frame (for performance) until motion detected
         if skip_frame and not motion_count:
             skip_frame = False
-            cap.grab()
             continue
         skip_frame = True
 
         # grab current frame
-        _, frame = cap.read()
+        frame = cap.read()
 
         # if frame not available, exit
         if frame is None:
@@ -99,8 +97,6 @@ def motion_detector(ip_cam):
             motion_count += 1
         else:
             motion_count = 0
-            # Sync up VideoCapture with latest frame
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
         if motion_count >= min_motion_frames:
             # Do YOLO detection for 15 seconds
@@ -112,8 +108,6 @@ def motion_detector(ip_cam):
                 utils.write_frame_and_thresh(frame, thresh)
                 # send_sms_async(frame, thresh)
                 write_timeout = curr + 20
-                # Sync up VideoCapture with latest frame
-                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             # yolo_timeout = time.time() + 15 * 1
             # if use_yolov3:
             #     yolo.run_yolo(
@@ -123,15 +117,14 @@ def motion_detector(ip_cam):
             motion_count = 0
 
     # cleanup the camera and close any open windows
-    cap.release()
-    cv2.destroyAllWindows()
+    cap.stop()
 
 
 def send_sms_async(frame, thresh):
     # Send SMS in another thread
     sms_args = {
         "auth": sms_auth,
-        "recipients": sms_reciepients
+        "recipients": sms_reciepients,
         "frame": frame.copy(),
         "thresh": thresh.copy(),
     }

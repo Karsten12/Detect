@@ -20,7 +20,7 @@ x_crop_min = 450  # start crop 450 from the left (NEW MASK), 250 is for OLD MASK
 
 carriers = {
     "sprint_SMS": "@messaging.sprintpcs.com",
-    # "sprint_MMS": "@pm.sprint.com",
+    "sprint_MMS": "@pm.sprint.com",
 }
 
 
