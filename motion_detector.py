@@ -142,7 +142,7 @@ if __name__ == "__main__":
     logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)
     use_yolov3 = config_dict["yolov3"]  # Use yolov3?
     classes = config_dict["coco_classes"]  # Classes for yolov3
-    send_sms = config_dict["send_sms"]  # Use sms notification?
+    # send_sms = config_dict["send_sms"]  # Use sms notification?
 
     if ip_cams is None:
         utils.print_err("ip cams is none")
@@ -161,9 +161,9 @@ if __name__ == "__main__":
         net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-    if send_sms:
-        sms_auth = config_dict["sms_auth"]
-        sms_reciepients = config_dict["sms_reciepients"]
+    # if send_sms:
+    #     sms_auth = config_dict["sms_auth"]
+    #     sms_reciepients = config_dict["sms_reciepients"]
 
     print("Starting motion detection...")
 
