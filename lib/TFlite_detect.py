@@ -9,7 +9,7 @@ from PIL import Image
 # import custom files
 import lib.utils as utils
 
-THRESHOLD = 0.0
+THRESHOLD = 0.5
 IMAGE_WIDTH, IMAGE_HEIGHT = 300, 300
 bbox_array = [IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH]
 tf_interpreter = None
