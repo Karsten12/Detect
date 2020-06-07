@@ -7,9 +7,9 @@ import sys
 import threading
 
 # import custom files
-import yolo
-import utils
-from videostream import VideoStream
+import lib.utils as utils
+import lib.TFlite_detect as tflite
+from lib.videostream import VideoStream
 
 
 def motion_detector(ip_cam):
@@ -99,25 +99,27 @@ def motion_detector(ip_cam):
             motion_count = 0
 
         if motion_count >= min_motion_frames:
-            # Do YOLO detection for 15 seconds
-            # print("Running Yolov3 detection")
+            # Do detection
             curr = time.time()
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 20 seconds
-                # print("Writing image")
+                # print("DOING DETECTION")
                 utils.write_frame_and_thresh(frame, thresh)
+                # tflite_detection(frame, thresh)
                 # send_sms_async(frame, thresh)
-                write_timeout = curr + 20
-            # yolo_timeout = time.time() + 15 * 1
-            # if use_yolov3:
-            #     yolo.run_yolo(
-            #         net, cap, classes, yolo_timeout, show_frame=False, store_image=True
-            #     )
-            # print("Finished Yolov3")
+                write_timeout = curr + 0
             motion_count = 0
 
     # cleanup the camera and close any open windows
     cap.stop()
+
+
+def tflite_detection(frame, thresh):
+    people = tflite.detect_people(frame, thresh)
+    if people:
+        utils.write_frame_and_thresh(frame, thresh, True)
+    else:
+        utils.write_frame_and_thresh(frame, thresh)
 
 
 def send_sms_async(frame, thresh):
@@ -139,27 +141,19 @@ if __name__ == "__main__":
     with open("config/config.json") as f:
         config_dict = json.load(f)
     ip_cams = config_dict["ip_cams"]  # links to ip cams
-    logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)
-    use_yolov3 = config_dict["yolov3"]  # Use yolov3?
-    classes = config_dict["coco_classes"]  # Classes for yolov3
+    # logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)
+    # use_yolov3 = config_dict["yolov3"]  # Use yolov3?
+    # classes = config_dict["coco_classes"]  # Classes for yolov3
     # send_sms = config_dict["send_sms"]  # Use sms notification?
 
     if ip_cams is None:
         utils.print_err("ip cams is none")
         exit()
 
-    if logs_to_file:
-        # Redirect the console and error to files for later viewing
-        sys.stdout = open("output/logs/out.txt", "w")
-        sys.stderr = open("output/logs/error.txt", "w")
-
-    if use_yolov3:
-        modelConfiguration = "yolov3.cfg"
-        modelWeights = "yolov3.weights"
-
-        net = cv2.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
-        net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-        net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+    # if logs_to_file:
+    #     # Redirect the console and error to files for later viewing
+    #     sys.stdout = open("output/logs/out.txt", "w")
+    #     sys.stderr = open("output/logs/error.txt", "w")
 
     # if send_sms:
     #     sms_auth = config_dict["sms_auth"]
@@ -167,5 +161,5 @@ if __name__ == "__main__":
 
     print("Starting motion detection...")
 
+    # tflite.load_tflite_model()
     motion_detector(ip_cams[1])
-    # motion_detector('images/vid_out_trim.mp4', show_frames)
