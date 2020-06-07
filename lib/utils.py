@@ -70,7 +70,7 @@ def get_padding_detection(frame, thresh):
     # im = cv2.rectangle(
     #     cropped_object, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2
     # )
-    # cv2.imshow("temp", im)
+    # cv2.imshow("temp", cropped_object)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
 

@@ -103,11 +103,9 @@ def motion_detector(ip_cam):
             curr = time.time()
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 20 seconds
-                # print("DOING DETECTION")
-                utils.write_frame_and_thresh(frame, thresh)
-                # tflite_detection(frame, thresh)
+                tflite_detection(frame, thresh)
                 # send_sms_async(frame, thresh)
-                write_timeout = curr + 0
+                write_timeout = curr + 20
             motion_count = 0
 
     # cleanup the camera and close any open windows
@@ -159,7 +157,9 @@ if __name__ == "__main__":
     #     sms_auth = config_dict["sms_auth"]
     #     sms_reciepients = config_dict["sms_reciepients"]
 
+    # Pre-load tf model
+    tflite.load_tflite_model()
+
     print("Starting motion detection...")
 
-    # tflite.load_tflite_model()
     motion_detector(ip_cams[1])
