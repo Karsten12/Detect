@@ -102,14 +102,9 @@ def crop_and_resize_frame(
 def write_frame_and_thresh(frame, thresh, people=False):
     curr_time = datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
     if people:
+        write_image(frame, directory="output/people", time=curr_time)
         write_image(
-            frame, directory="output/motion", class_name="person", time=curr_time
-        )
-        write_image(
-            thresh,
-            directory="output/motion",
-            class_name="person_thresh",
-            time=curr_time,
+            thresh, directory="output/people", class_name="thresh", time=curr_time,
         )
     else:
         write_image(frame, directory="output/motion", time=curr_time)
