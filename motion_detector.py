@@ -136,7 +136,7 @@ def send_sms_async(frame, thresh):
 if __name__ == "__main__":
 
     # --- Load options from config ---
-    with open("config/config.json") as f:
+    with open("lib/config.json") as f:
         config_dict = json.load(f)
     ip_cams = config_dict["ip_cams"]  # links to ip cams
     # logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)

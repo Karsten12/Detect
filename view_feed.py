@@ -43,7 +43,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Open and read in rtsp URL for the cameras
-    with open("config/config.json") as f:
+    with open("lib/config.json") as f:
         config_dict = json.load(f)
     ip_cams = config_dict["ip_cams"]
 
