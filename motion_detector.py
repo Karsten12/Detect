@@ -103,8 +103,9 @@ def motion_detector(ip_cam):
             curr = time.time()
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 20 seconds
+                cap.pause()
                 tflite_detection(frame, thresh)
-                # send_sms_async(frame, thresh)
+                cap.resume()
                 write_timeout = curr + 20
             motion_count = 0
 

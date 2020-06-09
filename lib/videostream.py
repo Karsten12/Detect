@@ -8,7 +8,7 @@ class VideoStream:
         # initialize the video camera stream and read the first frame
         # from the stream
         self.stream = cv2.VideoCapture(src)
-        (self.grabbed, self.frame) = self.stream.read()
+        _, self.frame = self.stream.read()
 
         # initialize the thread name
         self.name = name
@@ -32,7 +32,7 @@ class VideoStream:
                 return
 
             # otherwise, read the next frame from the stream
-            (self.grabbed, self.frame) = self.stream.read()
+            _, self.frame = self.stream.read()
 
     def read(self):
         # return the frame most recently read
@@ -41,6 +41,10 @@ class VideoStream:
     def pause(self):
         # indicate that the thread should be paused
         self.paused = True
+
+    def resume(self):
+        # indicate that the thread should be paused
+        self.paused = false
 
     def stop(self):
         self.pause()
