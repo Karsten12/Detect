@@ -44,7 +44,7 @@ class VideoStream:
 
     def resume(self):
         # indicate that the thread should be paused
-        self.paused = false
+        self.paused = False
 
     def stop(self):
         self.pause()
