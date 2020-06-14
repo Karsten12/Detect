@@ -65,34 +65,11 @@ def load_tflite_model():
     tf_interpreter = Interpreter(model)
 
 
-def detect_people(image, thresh):
+def detect_people(image, thresh = None):
     tf_interpreter.allocate_tensors()
 
-    cropped_image = utils.get_padding_detection(image, thresh)
-
-    # Resize and convert image to PIL format for input into model
-    resized_img = cv2.resize(cropped_image, (IMAGE_WIDTH, IMAGE_HEIGHT))
-    img_rgb = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB)
-    pil_im = Image.fromarray(img_rgb)
-
-    # Do detection and time it
-    # start_time = time.monotonic()
-    results = detect_objects(tf_interpreter, pil_im)
-    # elapsed_ms = time.monotonic() - start_time
-    # print(results)
-    if len(results) > 0:
-        # Person detected
-        return True
-
-    # No person detected
-    return False
-
-    if len(results) < 1:
-        exit()
-
-
-def detect_people_no_thresh(image):
-    tf_interpreter.allocate_tensors()
+    if thresh:
+        new_img = utils.get_padding_detection(image, thresh)
 
     # Resize and convert image to PIL format for input into model
     resized_img = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT))
@@ -111,6 +88,8 @@ def detect_people_no_thresh(image):
     # No person detected
     return False
 
+    if len(results) < 1:
+        exit()
 
 def detect(image):
 

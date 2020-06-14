@@ -30,8 +30,7 @@ def detect_person(ip_cam):
 
     cap = VideoStream(ip_cam).start()
 
-    curr = time.time()
-    timeout = curr + 20
+    timeout = time.time() + 20
     skip_frame = False
 
     while time.time() < timeout:
@@ -48,7 +47,7 @@ def detect_person(ip_cam):
 
         # Do person detection
         # TODO return person frame
-        person = tflite.detect_people_no_thresh(cropped_frame)
+        person = tflite.detect_people(cropped_frame)
         if not person:
             continue
 
