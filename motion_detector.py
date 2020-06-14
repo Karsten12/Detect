@@ -10,6 +10,7 @@ import threading
 import lib.utils as utils
 import lib.TFlite_detect as tflite
 from lib.videostream import VideoStream
+import door_cam
 
 
 def motion_detector(ip_cam):
@@ -103,9 +104,10 @@ def motion_detector(ip_cam):
             curr = time.time()
             if curr > write_timeout:
                 # Ensure only 1 image gets written every 20 seconds
-                cap.pause()
+                # cap.pause()
+                print("Doing Detection")
                 tflite_detection(frame, thresh)
-                cap.resume()
+                # cap.resume()
                 write_timeout = curr + 20
             motion_count = 0
 
@@ -114,11 +116,14 @@ def motion_detector(ip_cam):
 
 
 def tflite_detection(frame, thresh):
-    people = tflite.detect_people(frame, thresh)
-    if people:
-        utils.write_frame_and_thresh(frame, thresh, True)
+    person_sidewalk = tflite.detect_people(frame, thresh)
+    if person_sidewalk:
+        print("Person detected @ sidewalk")
+        door_cam.detect_person(ip_cams[0])
+        # utils.write_frame_and_thresh(frame, thresh, True)
     else:
-        utils.write_frame_and_thresh(frame, thresh)
+        print("No person detected @ sidewalk")
+        # utils.write_frame_and_thresh(frame, thresh)
 
 
 def send_sms_async(frame, thresh):
@@ -139,10 +144,10 @@ if __name__ == "__main__":
     # --- Load options from config ---
     with open("lib/config.json") as f:
         config_dict = json.load(f)
+    global ip_cams
     ip_cams = config_dict["ip_cams"]  # links to ip cams
+
     # logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)
-    # use_yolov3 = config_dict["yolov3"]  # Use yolov3?
-    # classes = config_dict["coco_classes"]  # Classes for yolov3
     # send_sms = config_dict["send_sms"]  # Use sms notification?
 
     if ip_cams is None:
