@@ -35,16 +35,8 @@ def motion_detector(ip_cam):
     mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
 
-    skip_frame = False
-
     # loop over the frames of the video
     while True:
-        # Skip every other frame (for performance) until motion detected
-        if skip_frame and not motion_count:
-            skip_frame = False
-            continue
-        skip_frame = True
-
         # grab current frame
         frame = cap.read()
 
@@ -142,26 +134,13 @@ def send_sms_async(frame, thresh):
 if __name__ == "__main__":
 
     # --- Load options from config ---
-    with open("lib/config.json") as f:
-        config_dict = json.load(f)
+    config_dict = utils.load_config()
     global ip_cams
     ip_cams = config_dict["ip_cams"]  # links to ip cams
-
-    # logs_to_file = config_dict["logs_to_file"]  # Output logs to file? (else console)
-    # send_sms = config_dict["send_sms"]  # Use sms notification?
 
     if ip_cams is None:
         utils.print_err("ip cams is none")
         exit()
-
-    # if logs_to_file:
-    #     # Redirect the console and error to files for later viewing
-    #     sys.stdout = open("output/logs/out.txt", "w")
-    #     sys.stderr = open("output/logs/error.txt", "w")
-
-    # if send_sms:
-    #     sms_auth = config_dict["sms_auth"]
-    #     sms_reciepients = config_dict["sms_reciepients"]
 
     # Pre-load tf model
     tflite.load_tflite_model()

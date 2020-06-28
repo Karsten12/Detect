@@ -6,6 +6,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+import json
+
 
 # For a 1920 x 1080 (1080p) feed
 frame_max_x, frame_max_y = 1920, 1080
@@ -183,3 +185,9 @@ def send_message(auth, recipients, frame=None, thresh=None):
     # Send SMS/MMS
     server.sendmail(auth[0], to_list, msg_to_send)
     server.quit()
+
+
+def load_config():
+    with open("lib/config.json") as f:
+        config_dict = json.load(f)
+    return config_dict

@@ -65,10 +65,10 @@ def load_tflite_model():
     tf_interpreter = Interpreter(model)
 
 
-def detect_people(image, thresh = None):
+def detect_people(image, thresh=None):
     tf_interpreter.allocate_tensors()
 
-    if thresh:
+    if thresh is not None:
         new_img = utils.get_padding_detection(image, thresh)
 
     # Resize and convert image to PIL format for input into model
@@ -90,6 +90,39 @@ def detect_people(image, thresh = None):
 
     if len(results) < 1:
         exit()
+
+
+def detect_people2(image):
+    tf_interpreter.allocate_tensors()
+
+    # Resize and convert image to PIL format for input into model
+    resized_img = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT))
+    img_rgb = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB)
+    pil_im = Image.fromarray(img_rgb)
+
+    results = detect_objects(tf_interpreter, pil_im)
+
+    if len(results) > 0:
+        print(results[0]["score"])
+        resulting_bounding_box = results[0]["bounding_box"]  # ymin, xmin, ymax, xmax
+
+        height, width, channels = image.shape
+        bbox_array = [height, width, height, width]
+
+        true_bbox = np.multiply(bbox_array, resulting_bounding_box).astype(int)
+        start_point = (true_bbox[1], true_bbox[0])
+        end_point = (true_bbox[3], true_bbox[2])
+
+        # return resized_img[true_bbox[0]:true_bbox[2], true_bbox[1]:true_bbox[3]]
+        return image[true_bbox[0] : true_bbox[2], true_bbox[1] : true_bbox[3]]
+
+        # im = cv2.rectangle(
+        #     resized_img, start_point, end_point, (255, 255, 255), 2
+        # )
+        # return im
+    else:
+        return None
+
 
 def detect(image):
 

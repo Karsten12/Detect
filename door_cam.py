@@ -21,12 +21,12 @@ def detect_person(ip_cam):
     # (called in a new thread from motion detector)
     # Pass in the TFlite detector from motion_detector.py
     # Repeat following until find person with face, or timeout
-        # Read each frame from door cam
-        # Crop into door portion
-        # Find person
-        # Find face using MTCNN
-        # Once face is found
-        # Do sklearn SVM, check if family or not
+    # Read each frame from door cam
+    # Crop into door portion
+    # Find person
+    # Find face using MTCNN
+    # Once face is found
+    # Do sklearn SVM, check if family or not
 
     cap = VideoStream(ip_cam).start()
 
