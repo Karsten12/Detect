@@ -2,10 +2,6 @@ import sys
 import cv2
 import imutils
 from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-from email.mime.multipart import MIMEMultipart
 import json
 
 
@@ -19,11 +15,6 @@ y_crop_max = 650  # end crop 650 from the top
 
 # 0 <= X <= 1920
 x_crop_min = 450  # start crop 450 from the left (NEW MASK), 250 is for OLD MASK
-
-carriers = {
-    "sprint_SMS": "@messaging.sprintpcs.com",
-    "sprint_MMS": "@pm.sprint.com",
-}
 
 
 def print_err(out):
@@ -141,50 +132,6 @@ def write_image(frame, directory=None, class_name=None, dimensions=None, time=No
         top, bottom, left, right = dimensions
         outFile = frame[top:bottom, left:right]
     cv2.imwrite(fileName, outFile)
-
-
-def login_server(auth):
-    # Establish a secure session with gmail's outgoing SMTP server using your gmail account
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(auth[0], auth[1])
-
-    return server
-
-
-def get_recipients_from_numbers(phone_numbers):
-    formatted_numbers = []
-    for number in phone_numbers:
-        tmp = str(number) + carriers["sprint_SMS"]
-        formatted_numbers.append(tmp)
-
-    return formatted_numbers
-
-
-def send_message(auth, recipients, frame=None, thresh=None):
-
-    server = login_server(auth)
-
-    to_list = get_recipients_from_numbers(recipients)
-
-    msg = MIMEMultipart()
-
-    text = "Motion detected at {}".format(datetime.now().strftime("%m-%d-%Y--%H-%M-%S"))
-
-    # Include text
-    msg.attach(MIMEText(text))
-
-    # If image, include it
-    if frame:
-        img = get_padding_detection(frame, thresh)
-        img_str = cv2.imencode(".png", img)[1].tostring()
-        msg.attach(MIMEImage(img_str))
-
-    msg_to_send = msg.as_string()
-
-    # Send SMS/MMS
-    server.sendmail(auth[0], to_list, msg_to_send)
-    server.quit()
 
 
 def load_config():
