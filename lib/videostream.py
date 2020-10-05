@@ -4,7 +4,7 @@ import cv2
 
 
 class VideoStream:
-    def __init__(self, src, name="IPVideoStream"):
+    def __init__(self, src, name):
         # initialize the video camera stream and read the first frame
         # from the stream
         self.stream = cv2.VideoCapture(src)
@@ -37,6 +37,10 @@ class VideoStream:
     def read(self):
         # return the frame most recently read
         return self.frame
+
+    def read_single_frame(self):
+        # Read a single frame w/o having to start the videostream
+        return self.stream.read()
 
     def pause(self):
         # indicate that the thread should be paused

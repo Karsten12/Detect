@@ -7,21 +7,19 @@ import sys
 import threading
 
 # import custom files
-import lib.telegram_bot as telegram_bot
 import lib.utils as utils
 import lib.TFlite_detect as tflite
 from lib.videostream import VideoStream
 import door_cam
 
 
-def motion_detector(ip_cam):
-    """ Detects motion from the video feed of ip_cam, and if motion calls YoloV3 to do object recognition 
+def motion_detector(ip_cam_objects):
+    """ Detects motion from the video feed of a single camera in ip_cam_objects, and if motion calls YoloV3 to do object recognition 
 	
 	Arguments:
-		ip_cam {str} -- The rtsp url to the live camera feed
+		ip_cam_objects {dict} -- Dictionary of videostream objects, representing each ip cam
 	"""
-
-    cap = VideoStream(ip_cam).start()
+    cap = ip_cam_objects["driveway_cam"].start()
 
     # initialize the frame in the video stream
     avg = None
@@ -30,7 +28,7 @@ def motion_detector(ip_cam):
     min_motion_frames = 20  # min num of frames w/ motion to trigger detection
     delta_thresh = 10  # min value pixel must be to trigger movement
     min_area = 50  # min area to trigger detection
-    write_timeout = 0
+    timeout = 0
 
     # Read in mask
     mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
@@ -95,56 +93,50 @@ def motion_detector(ip_cam):
         if motion_count >= min_motion_frames:
             # Do detection
             curr = time.time()
-            if curr > write_timeout:
-                # Ensure only 1 image gets written every 20 seconds
-                # cap.pause()
-                print("Doing Detection")
+            if curr > timeout:
+                # Limit the detections to max once every 20 seconds (to eliminate duplicate detections)
+                cap.pause()
+                # Do this in a seperate thread, in case
+                # this takes longer than 20 seconds,
                 tflite_detection(frame, thresh)
-                # cap.resume()
-                write_timeout = curr + 20
+                # Sleep this thread for 20 seconds
+                cap.resume()
+                timeout = curr + 20
             motion_count = 0
 
     # cleanup the camera and close any open windows
     cap.stop()
 
 
+# Check if person at sidewalk
 def tflite_detection(frame, thresh):
     person_sidewalk = tflite.detect_people(frame, thresh)
     if person_sidewalk:
         print("Person detected @ sidewalk")
-        door_cam.detect_person(ip_cams[0])
+        door_cam.detect_person(ip_cam_objects)
         # utils.write_frame_and_thresh(frame, thresh, True)
     else:
         print("No person detected @ sidewalk")
         # utils.write_frame_and_thresh(frame, thresh)
 
 
-def send_sms_async(frame, thresh):
-    # Send SMS in another thread
-    telegram_args = {
-        "recipients": sms_reciepients,
-        "frame": frame.copy(),
-        "thresh": thresh.copy(),
-    }
-    telegram_bot.send_message(sms_auth, sms_reciepients)
-    t = threading.Thread(target=utils.send_message, kwargs=sms_args)
-    t.start()
-
-
 if __name__ == "__main__":
 
     # --- Load options from config ---
     config_dict = utils.load_config()
-    global ip_cams
     ip_cams = config_dict["ip_cams"]  # links to ip cams
 
     if ip_cams is None:
         utils.print_err("ip cams is none")
         exit()
 
+    # Create the videostream objects for each ip cam
+    ip_cam_objects = {}
+    for ip_cam in ip_cams:
+        ip_cam_objects[ip_cam] = VideoStream(ip_cams[ip_cam], ip_cam)
+
     # Pre-load tf model
     tflite.load_tflite_model()
 
     print("Starting motion detection...")
-
-    motion_detector(ip_cams[1])
+    motion_detector(ip_cam_objects)

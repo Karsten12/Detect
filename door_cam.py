@@ -8,15 +8,16 @@ import threading
 
 # import custom files
 import lib.utils as utils
+import lib.telegram_bot as telegram_bot
 import lib.TFlite_detect as tflite
 from lib.videostream import VideoStream
 
 
-def detect_person(ip_cam):
-    """ Detects people from the video feed of ip_cam, and does facial recognition 
+def detect_person(ip_cam_objects):
+    """ Detects people from the video feed of a single camera in ip_cam_objects, and does facial recognition 
 	
 	Arguments:
-		ip_cam {str} -- The rtsp url to the live camera feed
+		ip_cam_objects {dict} -- Dictionary of videostream objects, representing each ip cam
 	"""
     # (called in a new thread from motion detector)
     # Pass in the TFlite detector from motion_detector.py
@@ -28,7 +29,7 @@ def detect_person(ip_cam):
     # Once face is found
     # Do sklearn SVM, check if family or not
 
-    cap = VideoStream(ip_cam).start()
+    cap = ip_cam_objects["garage_cam"].start()
 
     timeout = time.time() + 20
     skip_frame = False
@@ -61,6 +62,20 @@ def detect_person(ip_cam):
         # else:
         #     # Do facial recognition
         #     print("Hi")
+        #     if not known face
+        #     send_sms_async
 
     cap.stop()
     return
+
+
+def send_telegram_async(frame, thresh):
+    # Send message via telegram, in another thread
+    telegram_args = {
+        "recipients": sms_reciepients,
+        "frame": frame.copy(),
+        "thresh": thresh.copy(),
+    }
+    telegram_bot.send_message(sms_auth, sms_reciepients)
+    t = threading.Thread(target=utils.send_message, kwargs=sms_args)
+    t.start()

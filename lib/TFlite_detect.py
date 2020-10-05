@@ -65,7 +65,7 @@ def load_tflite_model():
     tf_interpreter = Interpreter(model)
 
 
-def detect_people(image, thresh=None):
+def detect_people(image, thresh=None, get_bbox=False):
     tf_interpreter.allocate_tensors()
 
     if thresh is not None:
@@ -83,6 +83,17 @@ def detect_people(image, thresh=None):
     # print(results)
     if len(results) > 0:
         # Person detected
+        if get_bbox:
+            resulting_bounding_box = results[0][
+                "bounding_box"
+            ]  # ymin, xmin, ymax, xmax
+            height, width, channels = image.shape
+            bbox_array = [height, width, height, width]
+
+            true_bbox = np.multiply(bbox_array, resulting_bounding_box).astype(int)
+            start_point = (true_bbox[1], true_bbox[0])
+            end_point = (true_bbox[3], true_bbox[2])
+            return image[true_bbox[0] : true_bbox[2], true_bbox[1] : true_bbox[3]]
         return True
 
     # No person detected
@@ -92,6 +103,7 @@ def detect_people(image, thresh=None):
         exit()
 
 
+# different bc it returns the cropped image of the person
 def detect_people2(image):
     tf_interpreter.allocate_tensors()
 
