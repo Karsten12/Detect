@@ -7,6 +7,7 @@ import sys
 import threading
 
 # import custom files
+import lib.telegram_bot as telegram_bot
 import lib.utils as utils
 import lib.TFlite_detect as tflite
 from lib.videostream import VideoStream
@@ -120,13 +121,12 @@ def tflite_detection(frame, thresh):
 
 def send_sms_async(frame, thresh):
     # Send SMS in another thread
-    sms_args = {
-        "auth": sms_auth,
+    telegram_args = {
         "recipients": sms_reciepients,
         "frame": frame.copy(),
         "thresh": thresh.copy(),
     }
-    utils.send_message(sms_auth, sms_reciepients)
+    telegram_bot.send_message(sms_auth, sms_reciepients)
     t = threading.Thread(target=utils.send_message, kwargs=sms_args)
     t.start()
 

@@ -3,6 +3,7 @@ import cv2
 import imutils
 from datetime import datetime
 import json
+from os import path
 
 
 # For a 1920 x 1080 (1080p) feed
@@ -135,6 +136,10 @@ def write_image(frame, directory=None, class_name=None, dimensions=None, time=No
 
 
 def load_config():
-    with open("lib/config.json") as f:
+    basepath = path.dirname(__file__)
+    filepath = path.abspath(path.join(basepath, "config.json"))
+    with open(filepath) as f:
         config_dict = json.load(f)
+    # with open("lib/config.json") as f:
+    #     config_dict = json.load(f)
     return config_dict
