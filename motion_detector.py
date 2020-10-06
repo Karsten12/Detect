@@ -92,20 +92,14 @@ def motion_detector(ip_cam_objects):
 
         if motion_count >= min_motion_frames:
             # Do detection
-            curr = time.time()
-            if curr > timeout:
-                # Limit the detections to max once every 20 seconds (to eliminate duplicate detections)
-                
-                cap.pause()
-                # Check for persion in a seperate thread, in case
-                # this takes longer than 15 seconds
-                async_detection(ip_cam_objects, frame, thresh)
-                # Sleep this thread for 20 seconds
-                timeout = curr + 20
-                time.sleep(timeout)
-                
-                cap.resume()
-                timeout = curr + 20
+            cap.pause()
+            # Check for persion in a seperate thread, in case
+            # this takes longer than 15 seconds
+            async_detection(ip_cam_objects, frame, thresh)
+            # Limit the detections to max once every 20 seconds (to eliminate duplicate detections)
+            # Sleep this thread for 20 seconds
+            time.sleep(time.time() + 20)
+            cap.resume()
             motion_count = 0
 
     # cleanup the camera and close any open windows
