@@ -13,10 +13,29 @@ import lib.TFlite_detect as tflite
 from lib.videostream import VideoStream
 
 
+# Check if person at sidewalk
+def tflite_detection(ip_cam_objects, frame, thresh):
+    """ Checks if a person is present in the frame
+
+    Args:
+        ip_cam_objects ([type]): [description]
+        frame ([type]): [description]
+        thresh ([type]): [description]
+    """
+    person_sidewalk = tflite.detect_people(frame, thresh)
+    if person_sidewalk:
+        print("Person detected @ sidewalk")
+        detect_person(ip_cam_objects)
+        # utils.write_frame_and_thresh(frame, thresh, True)
+    else:
+        print("No person detected @ sidewalk")
+        # utils.write_frame_and_thresh(frame, thresh)
+
+
 def detect_person(ip_cam_objects):
     """ Detects people from the video feed of a single camera in ip_cam_objects, and does facial recognition 
 	
-	Arguments:
+	Args:
 		ip_cam_objects {dict} -- Dictionary of videostream objects, representing each ip cam
 	"""
     # (called in a new thread from motion detector)
@@ -69,13 +88,7 @@ def detect_person(ip_cam_objects):
     return
 
 
-def send_telegram_async(frame, thresh):
-    # Send message via telegram, in another thread
-    telegram_args = {
-        "recipients": sms_reciepients,
-        "frame": frame.copy(),
-        "thresh": thresh.copy(),
-    }
-    telegram_bot.send_message(sms_auth, sms_reciepients)
-    t = threading.Thread(target=utils.send_message, kwargs=sms_args)
-    t.start()
+def send_telegram(frame, thresh):
+    # TODO
+    # Send message via telegram
+    telegram_bot.send_message()

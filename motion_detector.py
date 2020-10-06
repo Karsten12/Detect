@@ -98,7 +98,7 @@ def motion_detector(ip_cam_objects):
                 cap.pause()
                 # Do this in a seperate thread, in case
                 # this takes longer than 20 seconds,
-                tflite_detection(frame, thresh)
+                async_detection(ip_cam_objects, frame, thresh)
                 # Sleep this thread for 20 seconds
                 cap.resume()
                 timeout = curr + 20
@@ -108,16 +108,20 @@ def motion_detector(ip_cam_objects):
     cap.stop()
 
 
-# Check if person at sidewalk
-def tflite_detection(frame, thresh):
-    person_sidewalk = tflite.detect_people(frame, thresh)
-    if person_sidewalk:
-        print("Person detected @ sidewalk")
-        door_cam.detect_person(ip_cam_objects)
-        # utils.write_frame_and_thresh(frame, thresh, True)
-    else:
-        print("No person detected @ sidewalk")
-        # utils.write_frame_and_thresh(frame, thresh)
+# Starts a new thread to check if person at sidewalk
+def async_detection(ip_cam_objects, frame, thresh):
+    my_args = {
+        "ip_cam_objects": ip_cam_objects,
+        "frame": frame.copy(),
+        "thresh": thresh.copy(),
+    }
+    t = threading.Thread(
+        target=door_cam.tflite_detection,
+        name="person_sidewalk_thread",
+        kwargs=sms_args,
+        daemon=True,
+    )
+    t.start()
 
 
 if __name__ == "__main__":
