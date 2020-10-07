@@ -14,7 +14,7 @@ from lib.videostream import VideoStream
 
 
 # Check if person at sidewalk
-def tflite_detection(ip_cam_objects, frame, thresh):
+def tflite_detection(detector_obj, frame, thresh):
     """ Checks if a person is present in the frame
 
     Args:
@@ -22,21 +22,21 @@ def tflite_detection(ip_cam_objects, frame, thresh):
         frame ([type]): [description]
         thresh ([type]): [description]
     """
-    person_sidewalk = tflite.detect_people(frame, thresh)
+    person_sidewalk = tflite.detect_people(detector_obj.tf_intepreter, frame, thresh)
     if person_sidewalk:
         print("Person detected @ sidewalk")
-        detect_person(ip_cam_objects)
+        detect_person(detector_obj)
         # utils.write_frame_and_thresh(frame, thresh, True)
     else:
         print("No person detected @ sidewalk")
         # utils.write_frame_and_thresh(frame, thresh)
 
 
-def detect_person(ip_cam_objects):
-    """ Detects people from the video feed of a single camera in ip_cam_objects, and does facial recognition 
+def detect_person(detector_obj):
+    """ Detects motion from the video feed of a single camera in detector_obj, and does facial recognition 
 	
 	Args:
-		ip_cam_objects {dict} -- Dictionary of videostream objects, representing each ip cam
+		detector_obj {Detector} -- Instance of Detector
 	"""
     # (called in a new thread from motion detector)
     # Pass in the TFlite detector from motion_detector.py
@@ -48,7 +48,7 @@ def detect_person(ip_cam_objects):
     # Once face is found
     # Do sklearn SVM, check if family or not
 
-    cap = ip_cam_objects["garage_cam"].start()
+    cap = detector_obj.ip_cam_objects["garage_cam"].start()
 
     timeout = time.time() + 20
     skip_frame = False

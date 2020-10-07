@@ -12,7 +12,6 @@ import lib.utils as utils
 THRESHOLD = 0.5
 IMAGE_WIDTH, IMAGE_HEIGHT = 300, 300
 bbox_array = [IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH]
-tf_interpreter = None
 
 
 def set_input_tensor(interpreter, image):
@@ -59,14 +58,12 @@ def load_tflite_model():
     # Load the model
     model = "lib/SSD-mobileNET-v2.tflite"
 
-    global tf_interpreter
-
     # Load up tflite
-    tf_interpreter = Interpreter(model)
+    return Interpreter(model)
 
 
-def detect_people(image, thresh=None, get_bbox=False):
-    tf_interpreter.allocate_tensors()
+def detect_people(iterpreter, image, thresh=None, get_bbox=False):
+    iterpreter.allocate_tensors()
 
     if thresh is not None:
         new_img = utils.get_padding_detection(image, thresh)
@@ -78,7 +75,7 @@ def detect_people(image, thresh=None, get_bbox=False):
 
     # Do detection and time it
     # start_time = time.monotonic()
-    results = detect_objects(tf_interpreter, pil_im)
+    results = detect_objects(iterpreter, pil_im)
     # elapsed_ms = time.monotonic() - start_time
     # print(results)
     if len(results) > 0:
@@ -98,9 +95,6 @@ def detect_people(image, thresh=None, get_bbox=False):
 
     # No person detected
     return False
-
-    if len(results) < 1:
-        exit()
 
 
 # different bc it returns the cropped image of the person

@@ -5,6 +5,23 @@ import io
 import lib.utils as utils
 
 
+def vacation_mode(update, context):
+    """Enable/disable vacation mode when the command /vacation is issued"""
+    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, hello")
+    # TODO
+
+
+def send_frame(update, context):
+    """Send a frame from all cameras, when the command /frame is issued"""
+    # TODO
+    # send_media_group(chat_id=update.effective_chat.id)
+
+
+def stats(update, context):
+    """Send some brief stats, when the command /stats is issued"""
+    # TODO
+
+
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, hello")
 
@@ -34,6 +51,24 @@ def idk(frame=None, thresh=None):
     )
 
 
+def poll(telegram_token):
+    print("Starting telegram bot")
+    # Handle all the user commands
+    updater = Updater(token=telegram_token, use_context=True)
+    dp = updater.dispatcher
+    # Add handlers to respond to each command from a user
+    dp.add_handler(CommandHandler("vacation", vacation_mode))
+    dp.add_handler(CommandHandler("frame", send_frame))
+    dp.add_handler(CommandHandler("stats", stats))
+
+    # Poll/check for commands from the user
+    updater.start_polling()
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT. This should be used most of the time, since
+    # start_polling() is non-blocking and will stop the bot gracefully.
+    # updater.idle()
+
+
 if __name__ == "__main__":
     config_dict = utils.load_config()
 
@@ -45,11 +80,3 @@ if __name__ == "__main__":
 
     send_message(bot, karsten, "123")
     # send_photo(bot, karsten, io_buf)
-
-    # updater = Updater(token=telegram_token, use_context=True)
-    # dispatcher = updater.dispatcher
-
-    # start_handler = CommandHandler('start', start)
-    # dispatcher.add_handler(start_handler)
-
-    # updater.start_polling()

@@ -13,13 +13,13 @@ from lib.videostream import VideoStream
 import door_cam
 
 
-def motion_detector(ip_cam_objects):
-    """ Detects motion from the video feed of a single camera in ip_cam_objects, and if motion calls YoloV3 to do object recognition 
+def motion_detector(detector_obj):
+    """ Detects motion from the video feed of a single camera in detector_obj, and if motion calls YoloV3 to do object recognition 
 	
 	Arguments:
-		ip_cam_objects {dict} -- Dictionary of videostream objects, representing each ip cam
+		detector_obj {Detector} -- Instance of Detector
 	"""
-    cap = ip_cam_objects["driveway_cam"].start()
+    cap = detector_obj.ip_cam_objects["driveway_cam"].start()
 
     # initialize the frame in the video stream
     avg = None
@@ -28,7 +28,6 @@ def motion_detector(ip_cam_objects):
     min_motion_frames = 20  # min num of frames w/ motion to trigger detection
     delta_thresh = 10  # min value pixel must be to trigger movement
     min_area = 50  # min area to trigger detection
-    timeout = 0
 
     # Read in mask
     mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
@@ -95,7 +94,7 @@ def motion_detector(ip_cam_objects):
             cap.pause()
             # Check for persion in a seperate thread, in case
             # this takes longer than 15 seconds
-            async_detection(ip_cam_objects, frame, thresh)
+            async_detection(detector_obj, frame, thresh)
             # Limit the detections to max once every 20 seconds (to eliminate duplicate detections)
             # Sleep this thread for 20 seconds
             time.sleep(time.time() + 20)
@@ -107,38 +106,16 @@ def motion_detector(ip_cam_objects):
 
 
 # Starts a new thread to check if person at sidewalk
-def async_detection(ip_cam_objects, frame, thresh):
+def async_detection(detector_obj, frame, thresh):
     my_args = {
-        "ip_cam_objects": ip_cam_objects,
+        "detector_obj": detector_obj,
         "frame": frame.copy(),
         "thresh": thresh.copy(),
     }
     t = threading.Thread(
         target=door_cam.tflite_detection,
-        name="person_sidewalk_thread",
-        kwargs=sms_args,
+        name="person-sidewalk-thread",
+        kwargs=my_args,
         daemon=True,
     )
     t.start()
-
-
-if __name__ == "__main__":
-
-    # --- Load options from config ---
-    config_dict = utils.load_config()
-    ip_cams = config_dict["ip_cams"]  # links to ip cams
-
-    if ip_cams is None:
-        utils.print_err("ip cams is none")
-        exit()
-
-    # Create the videostream objects for each ip cam
-    ip_cam_objects = {}
-    for ip_cam in ip_cams:
-        ip_cam_objects[ip_cam] = VideoStream(ip_cams[ip_cam], ip_cam)
-
-    # Pre-load tf model
-    tflite.load_tflite_model()
-
-    print("Starting motion detection...")
-    motion_detector(ip_cam_objects)
