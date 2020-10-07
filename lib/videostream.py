@@ -40,7 +40,9 @@ class VideoStream:
 
     def read_single_frame(self):
         # Read a single frame w/o having to start the videostream
-        return self.stream.read()
+        if not self.paused:
+            return self.frame
+        return self.stream.read()[1]
 
     def pause(self):
         # indicate that the thread should be paused

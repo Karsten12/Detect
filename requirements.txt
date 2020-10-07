@@ -1,5 +1,6 @@
 certifi==2020.4.5.1
 imutils==0.5.3
 numpy==1.18.2
-opencv-python-headless==4.2.0.34
+opencv-python-headless
 Pillow
+python-telegram-bot

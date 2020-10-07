@@ -18,7 +18,7 @@ def tflite_detection(detector_obj, frame, thresh):
     """ Checks if a person is present in the frame
 
     Args:
-        ip_cam_objects ([type]): [description]
+        detector_obj {Detector} -- Instance of Detector
         frame ([type]): [description]
         thresh ([type]): [description]
     """
@@ -39,7 +39,6 @@ def detect_person(detector_obj):
 		detector_obj {Detector} -- Instance of Detector
 	"""
     # (called in a new thread from motion detector)
-    # Pass in the TFlite detector from motion_detector.py
     # Repeat following until find person with face, or timeout
     # Read each frame from door cam
     # Crop into door portion

@@ -3,11 +3,32 @@ from telegram.ext import Updater, CommandHandler
 import cv2
 import io
 import lib.utils as utils
+from functools import partial
 
 
-def vacation_mode(update, context):
+def check_authorized(update, detector_obj):
+    """ Check if the telegram user is authorized
+
+    Args:
+        detector_obj ([type]): [description]
+
+    Returns:
+        [bool]: T if authorized, F otherwise
+    """
+    if str(update.effective_chat.id) in detector_obj.telegram_ids:
+        return True
+    return False
+
+
+def vacation_mode(update, context, detector_obj):
     """Enable/disable vacation mode when the command /vacation is issued"""
-    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, hello")
+    if not check_authorized(update, detector_obj):
+        return
+    img = detector_obj.ip_cam_objects["driveway_cam"].read_single_frame()
+    buffer = cv2.imencode(".png", img)[1]
+    io_buf = io.BytesIO(buffer)
+    context.bot.send_photo(chat_id=update.effective_chat.id, photo=io_buf)
+    # context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, hello")
     # TODO
 
 
@@ -51,13 +72,17 @@ def idk(frame=None, thresh=None):
     )
 
 
-def poll(telegram_token):
+def poll(detector_obj):
     print("Starting telegram bot")
     # Handle all the user commands
-    updater = Updater(token=telegram_token, use_context=True)
+    updater = Updater(token=detector_obj.telegram_token, use_context=True)
     dp = updater.dispatcher
     # Add handlers to respond to each command from a user
-    dp.add_handler(CommandHandler("vacation", vacation_mode))
+    # dp.add_handler(CommandHandler("vacation", vacation_mode))
+    dp.add_handler(
+        CommandHandler("vacation", partial(vacation_mode, detector_obj=detector_obj))
+    )
+
     dp.add_handler(CommandHandler("frame", send_frame))
     dp.add_handler(CommandHandler("stats", stats))
 

@@ -15,7 +15,9 @@ import motion_detector as md
 
 
 class Detector:
-    def __init__(self, ip_cam_objects, tf_intepreter):
+    def __init__(
+        self, ip_cam_objects, tf_intepreter, telegram_people_dict, telegram_token
+    ):
         """[summary]
 
         Args:
@@ -24,6 +26,9 @@ class Detector:
         """
         self.ip_cam_objects = ip_cam_objects
         self.tf_intepreter = tf_intepreter
+        self.telegram_people_dict = telegram_people_dict
+        self.telegram_ids = list(telegram_people_dict.values())
+        self.telegram_token = telegram_token
 
 
 if __name__ == "__main__":
@@ -43,13 +48,13 @@ if __name__ == "__main__":
     tf_intepreter = tflite.load_tflite_model()
 
     # Create detector object
-    detector_obj = Detector(ip_cam_objects, tf_intepreter)
+    detector_obj = Detector(ip_cam_objects, tf_intepreter, people, telegram_token)
 
     # Create telegram thread
     t = threading.Thread(
         target=tg_bot.poll,
         name="Telegram-poll-thread",
-        args=(telegram_token,),
+        args=(detector_obj,),
         daemon=True,
     )
     t.start()
