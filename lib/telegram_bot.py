@@ -1,5 +1,6 @@
 import telegram
 from telegram.ext import Updater, CommandHandler
+from telegram import InputMediaPhoto
 import cv2
 import io
 import lib.utils as utils
@@ -24,18 +25,31 @@ def vacation_mode(update, context, detector_obj):
     """Enable/disable vacation mode when the command /vacation is issued"""
     if not check_authorized(update, detector_obj):
         return
+    # TODO
+
+
+def send_single_frame(update, context, detector_obj):
+    """Send a single frame, from a given camera, when the command /frame <cam-name> is issued"""
+    if not check_authorized(update, detector_obj):
+        return
     img = detector_obj.ip_cam_objects["driveway_cam"].read_single_frame()
-    buffer = cv2.imencode(".png", img)[1]
+    buffer = cv2.imencode(".jpg", img)[1]  # change from png to jpg to reduce load times
     io_buf = io.BytesIO(buffer)
     context.bot.send_photo(chat_id=update.effective_chat.id, photo=io_buf)
-    # context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, hello")
-    # TODO
 
 
-def send_frame(update, context):
-    """Send a frame from all cameras, when the command /frame is issued"""
-    # TODO
-    # send_media_group(chat_id=update.effective_chat.id)
+def send_frames(update, context, detector_obj):
+    """Send a single frame, from each camera, when the command /frames is issued"""
+    if not check_authorized(update, detector_obj):
+        return
+    images = []
+    for cam in detector_obj.ip_cam_objects:
+        img = detector_obj.ip_cam_objects[cam].read_single_frame()
+        buff = cv2.imencode(".jpg", img)[
+            1
+        ]  # change from png to jpg to reduce load times
+        images.append(InputMediaPhoto(io.BytesIO(buff)))
+    context.bot.send_media_group(chat_id=update.effective_chat.id, media=images)
 
 
 def stats(update, context):
@@ -64,7 +78,7 @@ def idk(frame=None, thresh=None):
     # Convert cv2 image to format usable by telegram
     img = cv2.imread("images/sample_image2.png")
     # img = get_padding_detection(frame, thresh)
-    buffer = cv2.imencode(".png", img)[1]
+    buffer = cv2.imencode(".jpg", img)[1]
     io_buf = io.BytesIO(buffer)
 
     bot.send_photo(
@@ -82,8 +96,9 @@ def poll(detector_obj):
     dp.add_handler(
         CommandHandler("vacation", partial(vacation_mode, detector_obj=detector_obj))
     )
-
-    dp.add_handler(CommandHandler("frame", send_frame))
+    dp.add_handler(
+        CommandHandler("frames", partial(send_frames, detector_obj=detector_obj))
+    )
     dp.add_handler(CommandHandler("stats", stats))
 
     # Poll/check for commands from the user
@@ -102,6 +117,4 @@ if __name__ == "__main__":
     karsten = people["Karsten"]
 
     bot = telegram.Bot(telegram_token)
-
-    send_message(bot, karsten, "123")
     # send_photo(bot, karsten, io_buf)

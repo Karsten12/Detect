@@ -1,10 +1,7 @@
 import imutils
 import cv2
-import json
 import time
 import numpy as np
-import sys
-import threading
 
 # import custom files
 import lib.utils as utils
@@ -81,7 +78,7 @@ def detect_person(detector_obj):
         #     # Do facial recognition
         #     print("Hi")
         #     if not known face
-        #     send_sms_async
+        #     send_telegram
 
     cap.stop()
     return
