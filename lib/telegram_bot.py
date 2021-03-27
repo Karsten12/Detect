@@ -5,6 +5,7 @@ import cv2
 import io
 import lib.utils as utils
 from functools import partial
+import logging
 
 
 def check_authorized(update, detector_obj):
@@ -32,10 +33,14 @@ def send_single_frame(update, context, detector_obj):
     """Send a single frame, from a given camera, when the command /frame <cam-name> is issued"""
     if not check_authorized(update, detector_obj):
         return
-    img = detector_obj.ip_cam_objects["driveway_cam"].read_single_frame()
-    buffer = cv2.imencode(".jpg", img)[1]  # change from png to jpg to reduce load times
-    io_buf = io.BytesIO(buffer)
-    context.bot.send_photo(chat_id=update.effective_chat.id, photo=io_buf)
+    if 'help' in context.args:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="The list of cameras are: {}.".format(list(detector_obj.ip_cam_objects.keys())))
+        return
+    if len(context.args) > 0 and context.args[0] in list(detector_obj.ip_cam_objects.keys()):
+        img = detector_obj.ip_cam_objects[context.args[0]].read_single_frame()
+        buffer = cv2.imencode(".jpg", img)[1]  # change from png to jpg to reduce load times
+        io_buf = io.BytesIO(buffer)
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=io_buf)
 
 
 def send_frames(update, context, detector_obj):
@@ -87,7 +92,7 @@ def idk(frame=None, thresh=None):
 
 
 def poll(detector_obj):
-    print("Starting telegram bot")
+    logging.info('Starting telegram bot')
     # Handle all the user commands
     updater = Updater(token=detector_obj.telegram_token, use_context=True)
     dp = updater.dispatcher
@@ -95,6 +100,9 @@ def poll(detector_obj):
     # dp.add_handler(CommandHandler("vacation", vacation_mode))
     dp.add_handler(
         CommandHandler("vacation", partial(vacation_mode, detector_obj=detector_obj))
+    )
+    dp.add_handler(
+        CommandHandler("frame", partial(send_single_frame, detector_obj=detector_obj))
     )
     dp.add_handler(
         CommandHandler("frames", partial(send_frames, detector_obj=detector_obj))

@@ -5,6 +5,7 @@ import time
 import numpy as np
 import sys
 import threading
+import logging
 
 # import custom files
 import lib.utils as utils
@@ -40,9 +41,9 @@ if __name__ == "__main__":
     people = config_dict["people"]  # Load up dict of people for telegram bot
 
     # Create the videostream objects for each ip cam
-    ip_cam_objects = {}
-    for ip_cam in ip_cams:
-        ip_cam_objects[ip_cam] = VideoStream(ip_cams[ip_cam], ip_cam)
+    ip_cam_objects = {
+        ip_cam: VideoStream(ip_cams[ip_cam], ip_cam) for ip_cam in ip_cams
+    }
 
     # Pre-load tf model
     tf_intepreter = tflite.load_tflite_model()
@@ -59,5 +60,5 @@ if __name__ == "__main__":
     )
     t.start()
 
-    print("Starting motion detection...")
+    logging.info("Starting motion detection...")
     md.motion_detector(detector_obj)

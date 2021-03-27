@@ -17,7 +17,7 @@ def motion_detector(detector_obj):
 	Arguments:
 		detector_obj {Detector} -- Instance of Detector
 	"""
-    cap = detector_obj.ip_cam_objects["driveway_cam"].start()
+    cap = detector_obj.ip_cam_objects["street"].start()
 
     # initialize the frame in the video stream
     avg = None
@@ -28,7 +28,7 @@ def motion_detector(detector_obj):
     min_area = 50  # min area to trigger detection
 
     # Read in mask
-    mask_image = cv2.imread("images/mask_night.png", cv2.IMREAD_GRAYSCALE)
+    mask_image = cv2.imread("images/new_mask.png", cv2.IMREAD_GRAYSCALE)
     im_mask = utils.crop_and_resize_frame(mask_image)
 
     # loop over the frames of the video
@@ -74,10 +74,7 @@ def motion_detector(detector_obj):
 
         # loop over the contours
         for c in cnts:
-            if cv2.contourArea(c) < min_area:
-                # if the contour is too small, ignore it
-                continue
-            else:
+            if cv2.contourArea(c) >= min_area:
                 # Motion detected
                 motion = True
                 break

@@ -7,8 +7,7 @@ from os import path
 
 
 # For a 1920 x 1080 (1080p) feed
-frame_max_x, frame_max_y = 1920, 1080
-frame_min = 0
+frame_min, frame_max_x, frame_max_y = 0, 1920, 1080
 
 # 0 <= Y <= 1080
 y_crop_min = 200  # start crop 200 from the top
@@ -140,6 +139,4 @@ def load_config():
     filepath = path.abspath(path.join(basepath, "config.json"))
     with open(filepath) as f:
         config_dict = json.load(f)
-    # with open("lib/config.json") as f:
-    #     config_dict = json.load(f)
     return config_dict

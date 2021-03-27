@@ -2,6 +2,7 @@ import imutils
 import cv2
 import time
 import numpy as np
+import logging
 
 # import custom files
 import lib.utils as utils
@@ -21,11 +22,11 @@ def tflite_detection(detector_obj, frame, thresh):
     """
     person_sidewalk = tflite.detect_people(detector_obj.tf_intepreter, frame, thresh)
     if person_sidewalk:
-        print("Person detected @ sidewalk")
+        logging.info("Person detected @ sidewalk")
         detect_person(detector_obj)
         # utils.write_frame_and_thresh(frame, thresh, True)
     else:
-        print("No person detected @ sidewalk")
+        logging.info("No person detected at sidewalk")
         # utils.write_frame_and_thresh(frame, thresh)
 
 
@@ -44,7 +45,7 @@ def detect_person(detector_obj):
     # Once face is found
     # Do sklearn SVM, check if family or not
 
-    cap = detector_obj.ip_cam_objects["garage_cam"].start()
+    cap = detector_obj.ip_cam_objects["door"].start()
 
     timeout = time.time() + 20
     skip_frame = False
@@ -68,7 +69,7 @@ def detect_person(detector_obj):
             continue
 
         # Person detected, find face using MTCNN
-        print("Person detected @ front door")
+        logging.info("Person detected @ front door")
 
         # TODO detect face
         # Face = None

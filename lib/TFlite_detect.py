@@ -41,10 +41,8 @@ def detect_objects(interpreter, image):
 
     results = []
     for i in range(count):
-        # Only check for people
-        if classes[i] != 0.0:
-            continue
-        if scores[i] >= THRESHOLD:
+        # Only check for people that meet the threshold
+        if classes[i] == 0.0 and scores[i] >= THRESHOLD:
             result = {
                 "bounding_box": boxes[i],
                 "class_id": classes[i],
@@ -78,7 +76,7 @@ def detect_people(iterpreter, image, thresh=None, get_bbox=False):
     results = detect_objects(iterpreter, pil_im)
     # elapsed_ms = time.monotonic() - start_time
     # print(results)
-    if len(results) > 0:
+    if results:
         # Person detected
         if get_bbox:
             resulting_bounding_box = results[0][
@@ -108,7 +106,7 @@ def detect_people2(image):
 
     results = detect_objects(tf_interpreter, pil_im)
 
-    if len(results) > 0:
+    if results:
         print(results[0]["score"])
         resulting_bounding_box = results[0]["bounding_box"]  # ymin, xmin, ymax, xmax
 

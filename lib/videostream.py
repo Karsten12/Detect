@@ -9,8 +9,7 @@ class VideoStream:
         # initialize the video camera stream and read the first frame
         # from the stream
         self.src = src
-        self.stream = cv2.VideoCapture(src)
-        _, self.frame = self.stream.read()
+        _, self.frame = None, None
 
         # initialize the thread name
         self.name = name
@@ -21,10 +20,12 @@ class VideoStream:
 
     def start(self):
         # start the thread to read frames from the video stream
+        self.stream = cv2.VideoCapture(self.src)
         self.paused = False
         t = Thread(target=self.update, name=self.name, args=())
         t.daemon = True
         t.start()
+        sleep(.1)
         return self
 
     def update(self):
