@@ -25,7 +25,7 @@ class VideoStream:
         t = Thread(target=self.update, name=self.name, args=())
         t.daemon = True
         t.start()
-        sleep(.1)
+        sleep(0.1)
         return self
 
     def update(self):
@@ -61,4 +61,3 @@ class VideoStream:
     def stop(self):
         self.pause()
         self.stream.release()
-        # cv2.destroyAllWindows()

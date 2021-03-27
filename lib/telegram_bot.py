@@ -29,32 +29,34 @@ def vacation_mode(update, context, detector_obj):
     # TODO
 
 
-def send_single_frame(update, context, detector_obj):
-    """Send a single frame, from a given camera, when the command /frame <cam-name> is issued"""
+def view_frames(update, context, detector_obj):
+    """ Send frame(s) from all cameras (default) or a single camera, when the command /view <cam-name> is issued """
     if not check_authorized(update, detector_obj):
         return
-    if 'help' in context.args:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="The list of cameras are: {}.".format(list(detector_obj.ip_cam_objects.keys())))
-        return
-    if len(context.args) > 0 and context.args[0] in list(detector_obj.ip_cam_objects.keys()):
-        img = detector_obj.ip_cam_objects[context.args[0]].read_single_frame()
-        buffer = cv2.imencode(".jpg", img)[1]  # change from png to jpg to reduce load times
-        io_buf = io.BytesIO(buffer)
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=io_buf)
-
-
-def send_frames(update, context, detector_obj):
-    """Send a single frame, from each camera, when the command /frames is issued"""
-    if not check_authorized(update, detector_obj):
-        return
-    images = []
-    for cam in detector_obj.ip_cam_objects:
-        img = detector_obj.ip_cam_objects[cam].read_single_frame()
-        buff = cv2.imencode(".jpg", img)[
-            1
-        ]  # change from png to jpg to reduce load times
-        images.append(InputMediaPhoto(io.BytesIO(buff)))
-    context.bot.send_media_group(chat_id=update.effective_chat.id, media=images)
+    if context.args:
+        if "help" in context.args:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="The list of cameras are: {}.".format(
+                    list(detector_obj.ip_cam_objects.keys())
+                ),
+            )
+        elif context.args[0] in detector_obj.ip_cam_objects:
+            # Send a frame from a single camera
+            img = detector_obj.ip_cam_objects[context.args[0]].read_single_frame()
+            # change from png to jpg to reduce load times
+            buff = cv2.imencode(".jpg", img)[1]
+            io_buf = io.BytesIO(buff)
+            context.bot.send_photo(chat_id=update.effective_chat.id, photo=io_buf)
+    else:
+        # Send frames from all cameras
+        images = []
+        for cam in detector_obj.ip_cam_objects:
+            img = detector_obj.ip_cam_objects[cam].read_single_frame()
+            # change from png to jpg to reduce load times
+            buff = cv2.imencode(".jpg", img)[1]
+            images.append(InputMediaPhoto(io.BytesIO(buff)))
+        context.bot.send_media_group(chat_id=update.effective_chat.id, media=images)
 
 
 def stats(update, context):
@@ -92,20 +94,16 @@ def idk(frame=None, thresh=None):
 
 
 def poll(detector_obj):
-    logging.info('Starting telegram bot')
+    logging.info("Starting telegram bot")
     # Handle all the user commands
     updater = Updater(token=detector_obj.telegram_token, use_context=True)
     dp = updater.dispatcher
     # Add handlers to respond to each command from a user
-    # dp.add_handler(CommandHandler("vacation", vacation_mode))
     dp.add_handler(
         CommandHandler("vacation", partial(vacation_mode, detector_obj=detector_obj))
     )
     dp.add_handler(
-        CommandHandler("frame", partial(send_single_frame, detector_obj=detector_obj))
-    )
-    dp.add_handler(
-        CommandHandler("frames", partial(send_frames, detector_obj=detector_obj))
+        CommandHandler("view", partial(view_frames, detector_obj=detector_obj))
     )
     dp.add_handler(CommandHandler("stats", stats))
 
