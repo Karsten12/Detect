@@ -9,7 +9,7 @@ class VideoStream:
         # initialize the video camera stream and read the first frame
         # from the stream
         self.src = src
-        _, self.frame = None, None
+        self.frame = None
 
         # initialize the thread name
         self.name = name
