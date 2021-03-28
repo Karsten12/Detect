@@ -1,9 +1,6 @@
 import imutils
 import cv2
-import json
-import time
 import numpy as np
-import sys
 import threading
 import logging
 
