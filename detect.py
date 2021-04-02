@@ -25,7 +25,7 @@ class Detector:
         self.ip_cam_objects = ip_cam_objects
         self.tf_intepreter = tf_intepreter
         self.telegram_people_dict = telegram_people_dict
-        self.telegram_ids = list(telegram_people_dict.values())
+        self.telegram_ids = set(telegram_people_dict.values())
         self.telegram_token = telegram_token
 
 
@@ -49,13 +49,12 @@ if __name__ == "__main__":
     detector_obj = Detector(ip_cam_objects, tf_intepreter, people, telegram_token)
 
     # Create telegram thread
-    t = threading.Thread(
+    threading.Thread(
         target=tg_bot.poll,
         name="Telegram-poll-thread",
         args=(detector_obj,),
         daemon=True,
-    )
-    t.start()
+    ).start()
 
     logging.info("Starting motion detection...")
     md.motion_detector(detector_obj)

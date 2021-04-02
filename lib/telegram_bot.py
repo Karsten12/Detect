@@ -17,9 +17,7 @@ def check_authorized(update, detector_obj):
     Returns:
         [bool]: T if authorized, F otherwise
     """
-    if str(update.effective_chat.id) in detector_obj.telegram_ids:
-        return True
-    return False
+    return update.effective_chat.id in detector_obj.telegram_ids
 
 
 def vacation_mode(update, context, detector_obj):
@@ -35,12 +33,10 @@ def view_frames(update, context, detector_obj):
         return
     if context.args:
         if "help" in context.args:
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text="The list of cameras are: {}.".format(
-                    list(detector_obj.ip_cam_objects.keys())
-                ),
+            msg = (
+                f"The list of cameras are: {list(detector_obj.ip_cam_objects.keys())}."
             )
+            context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
         elif context.args[0] in detector_obj.ip_cam_objects:
             # Send a frame from a single camera
             img = detector_obj.ip_cam_objects[context.args[0]].read_single_frame()
@@ -81,7 +77,7 @@ def send_video(bot, chat_id, video, silent=False):
 
 
 def idk(frame=None, thresh=None):
-    text = "Motion detected at {}".format(datetime.now().strftime("%m-%d-%Y--%H-%M-%S"))
+    text = f'Motion detected at {datetime.now().strftime("%m-%d-%Y--%H-%M-%S")}'
     # Convert cv2 image to format usable by telegram
     img = cv2.imread("images/sample_image2.png")
     # img = get_padding_detection(frame, thresh)
@@ -115,12 +111,12 @@ def poll(detector_obj):
     # updater.idle()
 
 
-if __name__ == "__main__":
-    config_dict = utils.load_config()
+# if __name__ == "__main__":
+#     config_dict = utils.load_config()
 
-    telegram_token = config_dict["telegram_token"]
-    people = config_dict["people"]  # Dict of people
-    karsten = people["Karsten"]
+#     telegram_token = config_dict["telegram_token"]
+#     people = config_dict["people"]  # Dict of people
+#     karsten = people["Karsten"]
 
-    bot = telegram.Bot(telegram_token)
-    # send_photo(bot, karsten, io_buf)
+#     bot = telegram.Bot(telegram_token)
+#     send_photo(bot, karsten, io_buf)
