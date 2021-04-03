@@ -10,7 +10,7 @@ import door_cam
 
 
 def motion_detector(detector_obj):
-    """ Detects motion from the video feed of a single camera in detector_obj, and if motion calls YoloV3 to do object recognition 
+    """ Detects motion from the video feed of a single camera in detector_obj, and if motion calls door_cam to do object recognition 
 	
 	Arguments:
 		detector_obj {Detector} -- Instance of Detector
