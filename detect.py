@@ -14,18 +14,20 @@ import motion_detector as md
 
 class Detector:
     def __init__(
-        self, ip_cam_objects, tf_intepreter, telegram_people_dict, telegram_token
+        self, ip_cam_objects, tf_intepreter, telegram_people, telegram_token
     ):
         """[summary]
 
         Args:
             ip_cam_objects (Dict): Dictionary of videostream objects, representing each ip cam
             tf_intepreter (tflite_runtime.interpreter): Instance of tflite_runtime.interpreter
+            telegram_people (Dict): Contains name:id pairs of all authorized telegram users
+            telegram_token (String): The token needed to use the bot
         """
         self.ip_cam_objects = ip_cam_objects
         self.tf_intepreter = tf_intepreter
-        self.telegram_people_dict = telegram_people_dict
-        self.telegram_ids = set(telegram_people_dict.values())
+        self.telegram_people = telegram_people
+        self.telegram_ids = set(telegram_people.values())
         self.telegram_token = telegram_token
 
 

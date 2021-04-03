@@ -107,10 +107,9 @@ def async_detection(detector_obj, frame, thresh):
         "frame": frame.copy(),
         "thresh": thresh.copy(),
     }
-    t = threading.Thread(
+    threading.Thread(
         target=door_cam.tflite_detection,
         name="person-sidewalk-thread",
         kwargs=my_args,
         daemon=True,
-    )
-    t.start()
+    ).start()

@@ -124,12 +124,10 @@ def detect_people2(image):
         #     resized_img, start_point, end_point, (255, 255, 255), 2
         # )
         # return im
-    else:
-        return None
+    return None
 
 
 def detect(image):
-
     load_tflite_model()
 
     tf_interpreter.allocate_tensors()
