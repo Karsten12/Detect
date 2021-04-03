@@ -6,10 +6,8 @@ import logging
 
 # import custom files
 import lib.utils as utils
-import lib.telegram_bot as telegram_bot
-import lib.TFlite_detect as tflite
-from lib.videostream import VideoStream
-
+import lib.telegram_bot as tg_bot
+import lib.tflite_detect as tflite
 
 # Check if person at sidewalk
 def tflite_detection(detector_obj, frame, thresh):
@@ -31,7 +29,7 @@ def tflite_detection(detector_obj, frame, thresh):
 
 
 def detect_person(detector_obj):
-    """ Detects motion from the video feed of a single camera in detector_obj, and does facial recognition 
+    """ Detects motion from the door cam video feed in detector_obj, and does facial recognition 
 	
 	Args:
 		detector_obj {Detector} -- Instance of Detector
@@ -88,4 +86,4 @@ def detect_person(detector_obj):
 def send_telegram(frame, thresh):
     # TODO
     # Send message via telegram
-    telegram_bot.send_message()
+    tg_bot.send_message()

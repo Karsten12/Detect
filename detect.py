@@ -6,7 +6,7 @@ import logging
 
 # import custom files
 import lib.utils as utils
-import lib.TFlite_detect as tflite
+import lib.tflite_detect as tflite
 from lib.videostream import VideoStream
 import lib.telegram_bot as tg_bot
 import motion_detector as md

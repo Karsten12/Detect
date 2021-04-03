@@ -6,8 +6,6 @@ import threading
 
 # import custom files
 import lib.utils as utils
-import lib.TFlite_detect as tflite
-from lib.videostream import VideoStream
 import door_cam
 
 
