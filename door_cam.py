@@ -7,7 +7,7 @@ import logging
 # import custom files
 import lib.utils as utils
 import lib.telegram_bot as tg_bot
-import lib.tflite_detect as tflite
+import lib.tflite_utils as tflite
 
 # Check if person at sidewalk
 def tflite_detection(detector_obj, frame, thresh):
@@ -18,7 +18,7 @@ def tflite_detection(detector_obj, frame, thresh):
         frame ([type]): [description]
         thresh ([type]): [description]
     """
-    person_sidewalk = tflite.detect_people(detector_obj.tf_intepreter, frame, thresh)
+    person_sidewalk = tflite.detect_people(detector_obj.person_model, frame, thresh)
     if person_sidewalk:
         logging.info("Person detected @ sidewalk")
         detect_person(detector_obj)
@@ -60,24 +60,27 @@ def detect_person(detector_obj):
         # Crop frame to front door area (y_min, y_max, x_min, x_max)
         cropped_frame = utils.crop_and_resize_frame(frame, (0, 700, 1100, 1920))
 
-        # Do person detection
-        # TODO return person frame
-        person = tflite.detect_people(cropped_frame)
+        # Do person detection, and if present, return the frame
+        person = tflite.detect_people(
+            detector_obj.person_model, cropped_frame, get_bbox=True
+        )
+
         if not person:
             continue
 
-        # Person detected, find face using MTCNN
+        # Person detected, find face
         logging.info("Person detected @ front door")
 
-        # TODO detect face
-        # Face = None
-        # if not Face:
-        #     continue
-        # else:
-        #     # Do facial recognition
-        #     print("Hi")
-        #     if not known face
-        #     send_telegram
+        # Detect face, and if present, return the frame
+        face = tflite.detect_face(detector_obj.face_model, person, get_bbox=True)
+
+        if not face:
+            continue
+
+        # TODO Do facial recognition
+        # logging.info("Face detected")
+        # if not known face
+        # send_telegram
 
     cap.stop()
     return

@@ -52,19 +52,22 @@ def detect_objects(interpreter, image):
     return results
 
 
-def load_tflite_model():
-    # Load the model
-    model = "lib/SSD-mobileNET-v2.tflite"
+def load_models():
+    # Load the models
+    # model to detect people
+    model_1 = "lib/SSD-mobileNET-v2.tflite"
+    # model to detect faces
+    model_2 = "lib/FaceSSD-mobileNET-v2.tflite"
 
-    # Load up tflite
-    return Interpreter(model)
+    # Return the Interpreter object for the person and face model
+    return Interpreter(model_1), Interpreter(model_2)
 
 
 def detect_people(iterpreter, image, thresh=None, get_bbox=False):
     iterpreter.allocate_tensors()
 
     if thresh is not None:
-        new_img = utils.get_padding_detection(image, thresh)
+        image = utils.get_padding_detection(image, thresh)
 
     # Resize and convert image to PIL format for input into model
     resized_img = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT))
@@ -79,19 +82,49 @@ def detect_people(iterpreter, image, thresh=None, get_bbox=False):
     if results:
         # Person detected
         if get_bbox:
-            resulting_bounding_box = results[0][
-                "bounding_box"
-            ]  # ymin, xmin, ymax, xmax
+            res_bbox = results[0]["bounding_box"]  # ymin, xmin, ymax, xmax
             height, width, channels = image.shape
             bbox_array = [height, width, height, width]
 
-            true_bbox = np.multiply(bbox_array, resulting_bounding_box).astype(int)
+            true_bbox = np.multiply(bbox_array, res_bbox).astype(int)
             start_point = (true_bbox[1], true_bbox[0])
             end_point = (true_bbox[3], true_bbox[2])
             return image[true_bbox[0] : true_bbox[2], true_bbox[1] : true_bbox[3]]
         return True
 
     # No person detected
+    return False
+
+def detect_face(iterpreter, image, thresh=None, get_bbox=False):
+    iterpreter.allocate_tensors()
+
+    if thresh is not None:
+        image = utils.get_padding_detection(image, thresh)
+
+    # Resize and convert image to PIL format for input into model
+    resized_img = cv2.resize(image, (IMAGE_WIDTH, IMAGE_HEIGHT))
+    img_rgb = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB)
+    pil_im = Image.fromarray(img_rgb)
+
+    # Do detection and time it
+    # start_time = time.monotonic()
+    results = detect_objects(iterpreter, pil_im)
+    # elapsed_ms = time.monotonic() - start_time
+    # print(results)
+    if results:
+        # face detected
+        if get_bbox:
+            res_bbox = results[0]["bounding_box"]  # ymin, xmin, ymax, xmax
+            height, width, channels = image.shape
+            bbox_array = [height, width, height, width]
+
+            true_bbox = np.multiply(bbox_array, res_bbox).astype(int)
+            start_point = (true_bbox[1], true_bbox[0])
+            end_point = (true_bbox[3], true_bbox[2])
+            return image[true_bbox[0] : true_bbox[2], true_bbox[1] : true_bbox[3]]
+        return True
+
+    # No face detected
     return False
 
 
@@ -128,9 +161,9 @@ def detect_people2(image):
 
 
 def detect(image):
-    load_tflite_model()
+    person_model, _ = load_models()
 
-    tf_interpreter.allocate_tensors()
+    person_model.allocate_tensors()
 
     # Calculate the input height/width for the model (already known)
     # _, input_height, input_width, _ = interpreter.get_input_details()[0]["shape"]
@@ -140,7 +173,7 @@ def detect(image):
 
     # Do detection and time it
     start_time = time.monotonic()
-    results = detect_objects(tf_interpreter, resized_img, THRESHOLD)
+    results = detect_objects(person_model, resized_img, THRESHOLD)
     elapsed_ms = time.monotonic() - start_time
 
     if len(results) < 1:
