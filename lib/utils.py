@@ -9,6 +9,7 @@ from os import path
 # For a 1920 x 1080 (1080p) feed
 frame_min, frame_max_x, frame_max_y = 0, 1920, 1080
 
+# street cam cropping
 # 0 <= Y <= 1080
 y_crop_min = 200  # start crop 200 from the top
 y_crop_max = 650  # end crop 650 from the top
@@ -74,7 +75,7 @@ def get_padding_detection(frame, thresh):
 
 
 def crop_and_resize_frame(
-    frame, crop_dimensions=(y_crop_min, y_crop_max, x_crop_min, frame_max_x)
+    frame, y_min=y_crop_min, y_max=y_crop_max, x_min=x_crop_min, x_max=frame_max_x
 ):
     """ Crop unimportant parts of frame, then resizes. Default crop detects people
 
@@ -82,12 +83,14 @@ def crop_and_resize_frame(
         frame {nd_array} -- Image frame
 
     Keyword Arguments:
-        crop_dimensions {tuple} -- The dimensions to crop the frame (default: {(y_crop_min, y_crop_max, x_crop_min, frame_max_x)})
+        y_min (int) -- the min y crop, defaults to y_crop_min
+        y_max (int) -- The max y crop, defaults to y_crop_max
+        x_min (int) -- the min x crop, defaults to x_crop_min
+        x_max (int) -- The max x crop, defaults to frame_max_x
 
     Returns:
         nd_array -- resulting image frame
     """
-    y_min, y_max, x_min, x_max = crop_dimensions
     # Crop frame -> [y_min:y_max, x_min:x_max]
     return imutils.resize(frame[y_min:y_max, x_min:x_max], width=500)
 

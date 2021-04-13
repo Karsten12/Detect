@@ -58,7 +58,9 @@ def detect_person(detector_obj):
         frame = cap.read()
 
         # Crop frame to front door area (y_min, y_max, x_min, x_max)
-        cropped_frame = utils.crop_and_resize_frame(frame, (0, 700, 1100, 1920))
+        # Using the driveway cam the crop is (0, 700, 1100, 1920)
+        # Using the door cam the crop is (100, 1080, 700, 1820)
+        cropped_frame = utils.crop_and_resize_frame(frame, 100, 1080, 700, 1820)
 
         # Do person detection, and if present, return the frame
         person = tflite.detect_people(

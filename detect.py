@@ -27,8 +27,8 @@ class Detector:
         """
         self.ip_cam_objects = ip_cam_objects
         # self.tf_intepreter = tf_intepreter
-        self.person_model = person_model_intepreter
-        self.face_model = face_model_intepreter
+        self.person_model = person_model
+        self.face_model = face_model
         self.telegram_people = telegram_people
         self.telegram_ids = set(telegram_people.values())
         self.telegram_token = telegram_token
